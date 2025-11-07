@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'home_page_steps_stream.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,7 +11,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final _stepsStream = HomePageStepsStream();
-
   bool _startWalking = true;
 
   @override
@@ -26,7 +25,13 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _onButtonPressed(bool startWalking) {
+  void _onButtonPressed(bool startWalking) async {
+    if (startWalking) {
+      await _stepsStream.start();
+    } else {
+      await _stepsStream.stop();
+    }
+
     setState(() {
       _startWalking = !startWalking;
     });
@@ -34,21 +39,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: _body());
+    return Scaffold(
+      body: _body(),
+      backgroundColor: const Color(0XFFFFFDD0),
+      bottomNavigationBar: _startWalking ? CustomNavigationBar(initialIndexOfScreen: 2) : null,
+    );
   }
 
   Widget _body() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [_welcomeText(), _stepsOverview(), _streamBuilder()],
+        children: [
+          if (_startWalking) _welcomeText() else _showSteps(),
+          _walkingButton(),
+          if (_startWalking) _showSteps(),
+        ],
       ),
     );
   }
 
-  Widget _streamBuilder() {
+  Widget _streamBuilder(BuildContext context) {
     return StreamBuilder<String>(
       stream: _stepsStream.pedestrianStatusStream,
+      initialData: _stepsStream.currentStatus,
       builder: (context, snapshot) {
         final status = snapshot.data ?? '?';
         final icon =
@@ -56,6 +70,8 @@ class _HomePageState extends State<HomePage> {
                 ? Icons.directions_walk
                 : status == 'stopped'
                 ? Icons.accessibility_new
+                : status == 'loading'
+                ? Icons.downloading
                 : Icons.error;
         return Column(
           children: [
@@ -76,32 +92,65 @@ class _HomePageState extends State<HomePage> {
   Widget _welcomeText() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('Hey there,', style: TextStyle(fontSize: 25)),
-        const Text('Ready for walking?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 30),
+      children: const [
+        Text('Hey there,', style: TextStyle(fontSize: 25)),
+        Text('Ready for walking?', style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+        SizedBox(height: 30),
       ],
     );
   }
 
-  Widget _stepsOverview() {
+  Widget _walkingButton() {
+    const Color brandBlue = Color(0xFF123456);
+    const Color disabledGrey = Color(0xFF949494);
+
+    final String label = _startWalking ? 'Start\nWalking' : 'Stop\nWalking';
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ElevatedButton(
-          onPressed: () => _onButtonPressed(_startWalking),
-          style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.all(_startWalking ? Color(0X00123456) : Color(0x00949494)),
+        Center(
+          child: ElevatedButton(
+            onPressed: () => _onButtonPressed(_startWalking),
+            style: ElevatedButton.styleFrom(
+              shape: const CircleBorder(),
+              backgroundColor: _startWalking ? brandBlue : disabledGrey,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(200, 200),
+              padding: EdgeInsets.zero,
+              elevation: 3,
+              shadowColor: Colors.black26,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w600, color: Colors.white),
+                ),
+                const SizedBox(height: 25),
+              ],
+            ),
           ),
-          child: const Text('Start Walking', style: TextStyle(color: Colors.white)),
         ),
+        const SizedBox(height: 24),
+        if (!_startWalking) _streamBuilder(context),
+      ],
+    );
+  }
+
+  Widget _showSteps() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
         const Text('Steps Taken', style: TextStyle(fontSize: 30)),
         StreamBuilder<String>(
           stream: _stepsStream.stepCountStream,
+          initialData: _stepsStream.currentSteps,
           builder: (context, snapshot) => Text(snapshot.data ?? '?', style: const TextStyle(fontSize: 60)),
         ),
         const SizedBox(height: 16.0),
-        const Text('Pedestrian Status', style: TextStyle(fontSize: 30)),
       ],
     );
   }
