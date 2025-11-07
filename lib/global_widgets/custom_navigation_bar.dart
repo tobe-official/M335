@@ -51,7 +51,7 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
       _currentIndex = index;
     });
 
-    Widget screen;
+    Widget? screen;
 
     switch (index) {
       case 0:
@@ -61,26 +61,28 @@ class _CustomNavigationBarState extends State<CustomNavigationBar> {
         screen = const PersonalStatsPage();
         break;
       case 2:
-        screen = const HomePage();
+        !isHome ? screen = const HomePage() : null;
         break;
       case 3:
         screen = const LeaderboardPage();
         break;
       case 4:
-        screen = const ProfilePage();
+        screen = ProfilePage();
         break;
       default:
         return;
     }
 
-    Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => screen,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return child;
-        },
-      ),
-    );
+    if (screen != null) {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => screen!,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return child;
+          },
+        ),
+      );
+    }
   }
 
   @override
