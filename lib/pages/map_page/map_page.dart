@@ -4,6 +4,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -13,16 +14,19 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  static const mapTilerKey = 'API KEY';
+  static const mapTilerKey = '';
   static const _urlTemplate =
       'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=$mapTilerKey';
 
   LatLng? _currentPosition;
   String _locationName = 'Loading location...';
 
+  late final FMTCStore _store;
+
   @override
   void initState() {
     super.initState();
+    _store = FMTCStore('mapStore')..manage.create();
     _determinePosition();
   }
 
@@ -85,7 +89,7 @@ class _MapPageState extends State<MapPage> {
               TileLayer(
                 urlTemplate: _urlTemplate,
                 userAgentPackageName: 'ch.m335.walkeroo',
-                tileProvider: NetworkTileProvider(),
+                tileProvider: _store.getTileProvider(),
               ),
               if (_currentPosition != null)
                 MarkerLayer(
