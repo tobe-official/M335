@@ -1,16 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// UserService – kümmert sich um alle Firebase–Operationen
-/// erstellen, lesen, aktualisieren, Aktivitäten hinzufügen
 class UserService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Erstellt ein neues Benutzerprofil nach der Registrierung.
+  // creates new user profile
   Future<void> createUserProfile(String name, String email) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('Kein Benutzer angemeldet');
+    if (user == null) throw Exception('No user is logged in');
 
     await _firestore.collection('users').doc(user.uid).set({
       'name': name,
@@ -20,26 +18,26 @@ class UserService {
     });
   }
 
-  /// Gibt das aktuelle Benutzerprofil als Stream zurück.
+  // returns userprofile as stream
   Stream<DocumentSnapshot<Map<String, dynamic>>> getCurrentUserProfile() {
     final user = _auth.currentUser;
     if (user == null) {
-      throw Exception('Kein Benutzer angemeldet');
+      if (user == null) throw Exception('No user is logged in');
     }
     return _firestore.collection('users').doc(user.uid).snapshots();
   }
 
-  /// Aktualisiert Benutzerdaten
+  // update user profile data
   Future<void> updateUserData(Map<String, dynamic> data) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('Kein Benutzer angemeldet');
+    if (user == null) throw Exception('No user is logged in');
     await _firestore.collection('users').doc(user.uid).update(data);
   }
 
-  /// Fügt eine Aktivität hinzu (Trackingdaten).
+  //adds activity for current user aka steps
   Future<void> addActivity(int steps, double distance) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('Kein Benutzer angemeldet');
+    if (user == null) throw Exception('No user is logged in');
 
     await _firestore.collection('activities').add({
       'userId': user.uid,
@@ -47,17 +45,15 @@ class UserService {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
-    // Optional: direkt die Gesamtschritte im User-Profil erhöhen
     await _firestore.collection('users').doc(user.uid).update({
       'totalSteps': FieldValue.increment(steps),
-      'totalDistance': FieldValue.increment(distance),
     });
   }
 
-  /// Holt alle Aktivitäten eines bestimmten Benutzers.
+  // get all user activities as a stream
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserActivities() {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('Kein Benutzer angemeldet');
+    if (user == null) throw Exception('No user is logged in');
 
     return _firestore
         .collection('activities')
@@ -66,12 +62,12 @@ class UserService {
         .snapshots();
   }
 
-  /// Löscht den aktuellen Benutzer und alle Daten.
+  //delete current user account along with their data
   Future<void> deleteUserAccount() async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('Kein Benutzer angemeldet');
+    if (user == null) throw Exception('No user is logged in');
 
-    // Alle Aktivitäten löschen
+    // delete user activities
     final activities = await _firestore
         .collection('activities')
         .where('userId', isEqualTo: user.uid)
@@ -80,10 +76,10 @@ class UserService {
       await doc.reference.delete();
     }
 
-    // User-Profil löschen
+    // delete user profile
     await _firestore.collection('users').doc(user.uid).delete();
 
-    // Benutzer aus Auth entfernen
+    // remove user authentication
     await user.delete();
   }
 }
