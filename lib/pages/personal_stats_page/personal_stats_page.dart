@@ -10,7 +10,7 @@ class PersonalStatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0XFFFFFDD0),
+      backgroundColor: const Color(0XFFD2D2D2),
         body: _body(),
         bottomNavigationBar: CustomNavigationBar(initialIndexOfScreen: 1));
   }
