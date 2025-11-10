@@ -1,3 +1,5 @@
+import 'package:m_335_flutter/enums/user_motivation_enum.dart';
+
 class UserModel {
   const UserModel({
     required this.username,
@@ -6,6 +8,7 @@ class UserModel {
     required this.name,
     required this.age,
     required this.friends,
+    required this.userMotivation,
     required this.aboutMe,
     required this.creationTime,
   });
@@ -18,4 +21,5 @@ class UserModel {
   final DateTime creationTime;
   final String name;
   final String aboutMe;
+  final UserMotivation? userMotivation;
 }

@@ -1,3 +1,4 @@
+import 'package:m_335_flutter/enums/user_motivation_enum.dart';
 import 'package:m_335_flutter/models/user_model.dart';
 
 List<UserModel> userData = [
@@ -9,6 +10,7 @@ List<UserModel> userData = [
     age: DateTime(2007, 3, 14),
     friends: [],
     aboutMe: "Love running in the mountains and staying active outdoors.",
+    userMotivation: UserMotivation.running,
     creationTime: DateTime.now().subtract(const Duration(days: 250)),
   ),
   UserModel(
@@ -19,6 +21,7 @@ List<UserModel> userData = [
     age: DateTime(2006, 11, 4),
     friends: [],
     aboutMe: "Gym rat and future fitness coach.",
+    userMotivation: UserMotivation.gym,
     creationTime: DateTime.now().subtract(const Duration(days: 180)),
   ),
   UserModel(
@@ -29,6 +32,7 @@ List<UserModel> userData = [
     age: DateTime(2008, 7, 22),
     friends: [],
     aboutMe: "Enjoys hiking, yoga, and spending time with friends.",
+    userMotivation: UserMotivation.yoga,
     creationTime: DateTime.now().subtract(const Duration(days: 320)),
   ),
   UserModel(
@@ -39,6 +43,7 @@ List<UserModel> userData = [
     age: DateTime(2008, 1, 25),
     friends: [],
     aboutMe: "Just testing BonApp — future CEO 😉",
+    userMotivation: UserMotivation.other,
     creationTime: DateTime.now().subtract(const Duration(days: 60)),
   ),
   UserModel(
@@ -49,6 +54,7 @@ List<UserModel> userData = [
     age: DateTime(2005, 9, 9),
     friends: [],
     aboutMe: "Loves swimming and late-night cycling through the city.",
+    userMotivation: UserMotivation.swimming,
     creationTime: DateTime.now().subtract(const Duration(days: 400)),
   ),
   UserModel(
@@ -59,6 +65,7 @@ List<UserModel> userData = [
     age: DateTime(2004, 12, 30),
     friends: [],
     aboutMe: "Tech nerd, gamer, and occasional runner.",
+    userMotivation: UserMotivation.running,
     creationTime: DateTime.now().subtract(const Duration(days: 95)),
   ),
   UserModel(
@@ -69,6 +76,7 @@ List<UserModel> userData = [
     age: DateTime(2007, 5, 10),
     friends: [],
     aboutMe: "Walking every day clears the mind.",
+    userMotivation: UserMotivation.walking,
     creationTime: DateTime.now().subtract(const Duration(days: 512)),
   ),
   UserModel(
@@ -79,6 +87,7 @@ List<UserModel> userData = [
     age: DateTime(2006, 2, 2),
     friends: [],
     aboutMe: "Climber and adventure enthusiast.",
+    userMotivation: UserMotivation.climbing,
     creationTime: DateTime.now().subtract(const Duration(days: 220)),
   ),
   UserModel(
@@ -89,6 +98,7 @@ List<UserModel> userData = [
     age: DateTime(2005, 6, 16),
     friends: [],
     aboutMe: "Yoga is not just movement, it's stillness in motion.",
+    userMotivation: UserMotivation.yoga,
     creationTime: DateTime.now().subtract(const Duration(days: 670)),
   ),
   UserModel(
@@ -99,6 +109,7 @@ List<UserModel> userData = [
     age: DateTime(2006, 10, 11),
     friends: [],
     aboutMe: "Cycling every morning before sunrise keeps me grounded.",
+    userMotivation: UserMotivation.cycling,
     creationTime: DateTime.now().subtract(const Duration(days: 150)),
   ),
 ];

@@ -116,6 +116,7 @@ class _RegisterState extends State<Register> {
       friends: <UserModel>[],
       age: _birthDate!,
       creationTime: DateTime.now(),
+      userMotivation: null,
     );
 
     try {
