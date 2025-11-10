@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _body(),
-      backgroundColor: const Color(0XFFFFFDD0),
+      backgroundColor: const Color(0XFFD2D2D2),
       bottomNavigationBar: _startWalking ? CustomNavigationBar(initialIndexOfScreen: 2) : null,
     );
   }
