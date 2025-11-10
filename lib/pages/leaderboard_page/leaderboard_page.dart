@@ -4,20 +4,18 @@ import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
 
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDFDEB),
+      backgroundColor: const Color(0xFFDADADA),
       body: _body(),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFDFDEB),
+        backgroundColor: const Color(0xFFDADADA),
         elevation: 0,
-        leading:IconButton(
-            onPressed: _onNotification,
-            icon: const Icon(Icons.mail_outline, color: Colors.black, size: 30),
-            tooltip: 'Friend Requests',
+        leading: IconButton(
+          onPressed: _onNotification,
+          icon: const Icon(Icons.mail_outline, color: Colors.black, size: 30),
+          tooltip: 'Friend Requests',
         ),
         actions: [
           Padding(
@@ -56,33 +54,15 @@ class LeaderboardPage extends StatelessWidget {
                 final item = leaderboard[index];
                 final isHighlighted = index == 3;
                 return Container(
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 6,
-                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 6),
                   decoration: BoxDecoration(
-                    color:
-                        isHighlighted
-                            ? const Color(0xFFB9E2A5)
-                            : const Color(0xFFD9D9D9),
+                    color: isHighlighted ? const Color(0xFFB9E2A5) : const Color(0xFFFFFCD6),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: ListTile(
-                    leading: Text(
-                      '${index + 1}.',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    title: Text(
-                      item['name']!,
-                      style: const TextStyle(fontWeight: FontWeight.w500),
-                    ),
-                    trailing: Text(
-                      item['distance']!,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    leading: Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    title: Text(item['name']!, style: const TextStyle(fontWeight: FontWeight.w500)),
+                    trailing: Text(item['distance']!, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 );
               },
@@ -100,7 +80,6 @@ class LeaderboardPage extends StatelessWidget {
       ),
     );
   }
-
 
   void _onAddFriends() {}
 
