@@ -33,6 +33,7 @@ class FriendsService {
 
   // returns list of friend profiles sorted by totalSteps descending
   // each item is a Map with at least 'id' and the user's fields
+  // TODO: as you create the leaderboard sort the current user as well in this list
   Future<List<Map<String, dynamic>>> getFriendsSortedBySteps() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user is logged in');
