@@ -8,36 +8,57 @@ class TrackingController {
   TrackingController._internal();
 
   final List<LatLng> _routePoints = [];
+  StreamSubscription<Position>? _positionStreamSub;
+  DateTime? _trackingStartTime;
+  DateTime? _trackingEndTime;
+  int? _startSteps;
+  int? _endSteps;
+  bool _isTracking = false;
+  bool get isTracking => _isTracking;
   List<LatLng> get routePoints => List.unmodifiable(_routePoints);
 
-  StreamSubscription<Position>? _positionSub;
-  bool _tracking = false;
-
-  bool get isTracking => _tracking;
-
-  Future<void> start() async {
-    if (_tracking) return;
-    _tracking = true;
+  Future<void> startTracking(int startSteps) async {
+    if (_isTracking) return;
+    _isTracking = true;
     _routePoints.clear();
+    recordStartSteps(startSteps);
+    _trackingStartTime = DateTime.now();
 
     final settings = const LocationSettings(
       accuracy: LocationAccuracy.best,
       distanceFilter: 5,
     );
 
-    _positionSub = Geolocator.getPositionStream(locationSettings: settings)
-        .listen((pos) {
-      _routePoints.add(LatLng(pos.latitude, pos.longitude));
-    });
+    _positionStreamSub =
+        Geolocator.getPositionStream(locationSettings: settings).listen((pos) {
+          _routePoints.add(LatLng(pos.latitude, pos.longitude));
+        });
   }
 
-  Future<void> stop() async {
-    _tracking = false;
-    await _positionSub?.cancel();
-    _positionSub = null;
+  Future<void> stopTracking(int endSteps) async {
+    recordEndSteps(endSteps);
+    _trackingEndTime = DateTime.now();
+
+    if (!_isTracking) return;
+    _isTracking = false;
+    await _positionStreamSub?.cancel();
+    _positionStreamSub = null;
   }
 
-  void dispose() {
-    _positionSub?.cancel();
+  List<DateTime?> getLastTrackingTimes() {
+    return [_trackingStartTime, _trackingEndTime];
+  }
+
+  void recordStartSteps(int steps) {
+    _startSteps = steps;
+  }
+
+  void recordEndSteps(int steps) {
+    _endSteps = steps;
+  }
+
+  int getLastStepsDifference() {
+    if (_startSteps == null || _endSteps == null) return 0;
+    return (_endSteps! - _startSteps!).clamp(0, 999999);
   }
 }

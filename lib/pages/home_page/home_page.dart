@@ -3,6 +3,8 @@ import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'home_page_steps_stream.dart';
 import 'package:m_335_flutter/controller/tracking_controller.dart';
+import 'package:m_335_flutter/controller/tracking_controller.dart';
+import 'package:m_335_flutter/controller/route_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -30,11 +32,15 @@ class _HomePageState extends State<HomePage> {
   void _onButtonPressed(bool startWalking) async {
     if (startWalking) {
       await _stepsStream.start();
-      await TrackingController().start(); // start Map-Tracking via controller
+      final stepsAtStartingPoint = int.tryParse((_stepsStream.currentSteps ?? '0').toString()) ?? 0;
+
+      await TrackingController().startTracking(stepsAtStartingPoint);
       await WakelockPlus.enable();
     } else {
       await _stepsStream.stop();
-      await TrackingController().stop(); // stop Map-Tracking
+      final stepsAtEndingPoint = int.tryParse((_stepsStream.currentSteps ?? '0').toString()) ?? 0;
+      await TrackingController().stopTracking(stepsAtEndingPoint);
+      await RouteController().addRoute(points: TrackingController().routePoints, stepDiff: TrackingController().getLastStepsDifference(),start: TrackingController().getLastTrackingTimes()[0]!, end: TrackingController().getLastTrackingTimes()[1]!);
       await WakelockPlus.disable();
     }
 
@@ -42,6 +48,7 @@ class _HomePageState extends State<HomePage> {
       _startWalking = !startWalking;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {

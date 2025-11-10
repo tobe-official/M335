@@ -88,27 +88,6 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  Future<void> startTracking() async {
-    _routePoints.clear();
-    _trackingActive = true;
-
-    final settings = const LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 1, // every meter new "current location"
-    );
-
-    _positionStreamSub =
-        Geolocator.getPositionStream(locationSettings: settings).listen((pos) {
-          _updateLocation(pos);
-        });
-  }
-
-  Future<void> stopTracking() async {
-    _trackingActive = false;
-    await _positionStreamSub?.cancel();
-    _positionStreamSub = null;
-  }
-
   @override
   void dispose() {
     _positionStreamSub?.cancel();
