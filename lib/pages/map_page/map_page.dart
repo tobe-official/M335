@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
@@ -5,6 +7,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:m_335_flutter/controller/tracking_controller.dart';
+
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -14,20 +18,30 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  final MapController _mapController = MapController();
   static const mapTilerKey = '';
   static const _urlTemplate =
       'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=$mapTilerKey';
 
   LatLng? _currentPosition;
   String _locationName = 'Loading location...';
-
   late final FMTCStore _store;
+
+  final List<LatLng> _routePoints = [];
+  StreamSubscription<Position>? _positionStreamSub;
+  bool _trackingActive = false;
+  DateTime? _lastLocationUpdate;
 
   @override
   void initState() {
     super.initState();
     _store = FMTCStore('mapStore')..manage.create();
     _determinePosition();
+
+    // every 0.1 seconds we track the position
+    Timer.periodic(const Duration(milliseconds: 100), (_) {
+      if (mounted && TrackingController().isTracking) setState(() {});
+    });
   }
 
   Future<void> _determinePosition() async {
@@ -51,25 +65,54 @@ class _MapPageState extends State<MapPage> {
       return;
     }
 
-    Position position = await Geolocator.getCurrentPosition(
+    final position = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
-    _currentPosition = LatLng(position.latitude, position.longitude);
+    _updateLocation(position);
+  }
 
-    List<Placemark> placemarks =
-    await placemarkFromCoordinates(position.latitude, position.longitude);
+  void _updateLocation(Position position) async {
+    final latLng = LatLng(position.latitude, position.longitude);
+    setState(() => _currentPosition = latLng);
+    _mapController.move(latLng, 17);
 
-    if (placemarks.isNotEmpty) {
-      final place = placemarks.first;
-      setState(() {
-        _locationName = place.locality?.isNotEmpty == true
-            ? place.locality!
-            : place.administrativeArea ?? 'Unknown';
-      });
-    } else {
-      setState(() => _locationName = 'Unknown');
+    // all 10 seconds we update the "header" with the current location name
+    if (_lastLocationUpdate == null ||
+        DateTime.now().difference(_lastLocationUpdate!) > const Duration(seconds: 1)) {
+      _lastLocationUpdate = DateTime.now();
+      final placemarks = await placemarkFromCoordinates(latLng.latitude, latLng.longitude);
+      if (placemarks.isNotEmpty) {
+        setState(() => _locationName = placemarks.first.locality ?? 'Unknown');
+      }
     }
+  }
+
+  Future<void> startTracking() async {
+    _routePoints.clear();
+    _trackingActive = true;
+
+    final settings = const LocationSettings(
+      accuracy: LocationAccuracy.best,
+      distanceFilter: 1, // every meter new "current location"
+    );
+
+    _positionStreamSub =
+        Geolocator.getPositionStream(locationSettings: settings).listen((pos) {
+          _updateLocation(pos);
+        });
+  }
+
+  Future<void> stopTracking() async {
+    _trackingActive = false;
+    await _positionStreamSub?.cancel();
+    _positionStreamSub = null;
+  }
+
+  @override
+  void dispose() {
+    _positionStreamSub?.cancel();
+    super.dispose();
   }
 
   @override
@@ -79,11 +122,10 @@ class _MapPageState extends State<MapPage> {
       body: Stack(
         children: [
           FlutterMap(
+            mapController: _mapController,
             options: MapOptions(
               initialCenter: _currentPosition ?? const LatLng(46.948, 7.4474),
-              initialZoom: 13,
-              minZoom: 3,
-              maxZoom: 19,
+              initialZoom: 15,
             ),
             children: [
               TileLayer(
@@ -91,6 +133,28 @@ class _MapPageState extends State<MapPage> {
                 userAgentPackageName: 'ch.m335.walkeroo',
                 tileProvider: _store.getTileProvider(),
               ),
+              if (_routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _routePoints,
+                      color: Colors.blueAccent,
+                      strokeWidth: 3,
+                    ),
+                  ],
+                ),
+
+              if (TrackingController().routePoints.isNotEmpty)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: TrackingController().routePoints,
+                      color: Colors.blueAccent,
+                      strokeWidth: 5,
+                    ),
+                  ],
+                ),
+
               if (_currentPosition != null)
                 MarkerLayer(
                   markers: [
@@ -98,7 +162,8 @@ class _MapPageState extends State<MapPage> {
                       point: _currentPosition!,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.my_location, color: Colors.blueAccent, size: 36),
+                      child: const Icon(Icons.my_location,
+                          color: Colors.redAccent, size: 36),
                     ),
                   ],
                 ),
@@ -113,13 +178,6 @@ class _MapPageState extends State<MapPage> {
               decoration: BoxDecoration(
                 color: const Color(0xFF222222),
                 borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.45),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  )
-                ],
                 border: Border.all(color: Colors.white12),
               ),
               child: Text(
@@ -130,24 +188,6 @@ class _MapPageState extends State<MapPage> {
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 12,
-            right: 12,
-            bottom: 16 + MediaQuery.of(context).padding.bottom,
-            child: Container(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.45),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Text(
-                'MapTiler / OpenStreetMap contributors',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ),
           ),

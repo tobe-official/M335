@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'home_page_steps_stream.dart';
+import 'package:m_335_flutter/controller/tracking_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -29,9 +30,11 @@ class _HomePageState extends State<HomePage> {
   void _onButtonPressed(bool startWalking) async {
     if (startWalking) {
       await _stepsStream.start();
+      await TrackingController().start(); // start Map-Tracking via controller
       await WakelockPlus.enable();
     } else {
       await _stepsStream.stop();
+      await TrackingController().stop(); // stop Map-Tracking
       await WakelockPlus.disable();
     }
 
