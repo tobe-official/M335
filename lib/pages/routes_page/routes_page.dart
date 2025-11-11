@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:m_335_flutter/controller/route_controller.dart';
 import 'package:m_335_flutter/models/map_model.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -34,7 +33,7 @@ class _RoutesPageState extends State<RoutesPage> {
     final routes = _routeController.allRoutes;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Gespeicherte Routen')),
+      appBar: AppBar(title: const Text('Saved Routes')),
       body: Row(
         children: [
           Expanded(
@@ -64,8 +63,8 @@ class _RoutesPageState extends State<RoutesPage> {
 
           Expanded(
             flex: 2,
-            child: _selectedRoute == null
-                ? const Center(child: Text('Wähle eine Route aus'))
+            child: _selectedRoute == null || RouteController().isValidRoute(_selectedRoute!)
+                ? const Center(child: Text('Choose a route to display'))
                 : FlutterMap(
               options: MapOptions(
                 initialCenter: _selectedRoute!.points.first,
