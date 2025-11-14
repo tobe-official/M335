@@ -40,7 +40,13 @@ dependencies:
   firebase_core: ^4.2.1
   cloud_firestore: ^6.1.0
   firebase_auth: ^6.1.2
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  flutter_map_tile_caching: ^10.1.1
+  geolocator: ^14.0.1
+  geocoding: ^4.0.0
   flutter_launcher_icons: ^0.14.4
+  path_provider: ^2.1.5
 
 # This changes the default Flutter Icon to be our custom Icon.
 flutter_launcher_icons:
