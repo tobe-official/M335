@@ -102,9 +102,10 @@ class UserService {
 
     final motivationRaw = data['userMotivation'] as String?;
     final motivation =
-        motivationRaw != null
-            ? UserMotivation.values.firstWhere((m) => m.name == motivationRaw, orElse: () => UserMotivation.other)
-            : UserMotivation.other;
+    motivationRaw != null
+        ? UserMotivation.values.firstWhere((m) => m.name == motivationRaw,
+        orElse: () => UserMotivation.other)
+        : UserMotivation.other;
 
     return UserModel(
       username: username,
@@ -131,7 +132,7 @@ class UserService {
     await _firestore.collection('users').doc(user.uid).update(data);
   }
 
-  Future<void> addActivity(int steps, double distance) async {
+  Future<void> addActivity(int steps) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user is logged in');
 
@@ -141,8 +142,38 @@ class UserService {
       'timestamp': FieldValue.serverTimestamp(),
     });
 
-    await _firestore.collection('users').doc(user.uid).update({'totalSteps': FieldValue.increment(steps)});
+    await _firestore.collection('users').doc(user.uid).update({
+      'totalSteps': FieldValue.increment(steps),
+    });
   }
+
+  Future<List<QueryDocumentSnapshot<
+      Map<String, dynamic>>>> getActivitiesLast7Days() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("Not logged in.");
+
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+
+    final snap = await _firestore
+        .collection('activities')
+        .where('userId', isEqualTo: user.uid)
+        .where('timestamp', isGreaterThan: weekAgo)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    return snap.docs;
+  }
+
+  Future<int> getTotalStepsLast7Days() async {
+    final docs = await getActivitiesLast7Days();
+    final total = docs.fold<int>(
+      0,
+          (sum, doc) => sum + (doc['steps'] as int? ?? 0),
+    );
+    return total;
+  }
+
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserActivities() {
     final user = _auth.currentUser;
@@ -159,7 +190,8 @@ class UserService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user is logged in');
 
-    final activities = await _firestore.collection('activities').where('userId', isEqualTo: user.uid).get();
+    final activities = await _firestore.collection('activities').where(
+        'userId', isEqualTo: user.uid).get();
 
     for (var doc in activities.docs) {
       await doc.reference.delete();

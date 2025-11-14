@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../data_fetching/user_service.dart';
 import 'home_page_steps_stream.dart';
 import 'package:WalkeRoo/controller/tracking_controller.dart';
 import 'package:WalkeRoo/controller/route_controller.dart';
@@ -32,11 +33,18 @@ class _HomePageState extends State<HomePage> {
   void _onButtonPressed(bool startWalking) async {
     if (startWalking) {
       await _stepsStream.start();
+      _stepsStream.markStart();
       final stepsAtStartingPoint = int.tryParse((_stepsStream.currentSteps ?? '0').toString()) ?? 0;
 
       await TrackingController().startTracking(stepsAtStartingPoint);
       await WakelockPlus.enable();
     } else {
+      final steps = _stepsStream.stepsSinceStart();
+
+      if (steps > 0) {
+        await UserService().addActivity(steps);
+      }
+
       await _stepsStream.stop();
       final stepsAtEndingPoint = int.tryParse((_stepsStream.currentSteps ?? '0').toString()) ?? 0;
       await TrackingController().stopTracking(stepsAtEndingPoint);

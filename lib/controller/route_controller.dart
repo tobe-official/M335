@@ -82,4 +82,24 @@ class RouteController {
     final duration = route.endTime.difference(route.startTime);
     return route.startTime.isBefore(route.endTime) && route.stepCount > 0 && duration.inSeconds > 60;
   }
+
+  List<RouteModel> getRoutesFromToday() {
+    final now = DateTime.now();
+    return _routes.where((r) =>
+    r.startTime.year == now.year &&
+        r.startTime.month == now.month &&
+        r.startTime.day == now.day
+    ).toList();
+  }
+
+  int getTotalMinutesFromToday() {
+    final routes = getRoutesFromToday();
+    int minutes = 0;
+
+    for (var r in routes) {
+      minutes += r.endTime.difference(r.startTime).inMinutes;
+    }
+
+    return minutes;
+  }
 }
