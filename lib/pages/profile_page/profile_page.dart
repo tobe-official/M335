@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:m_335_flutter/data_fetching/user_service.dart';
 import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'package:m_335_flutter/models/user_model.dart';
 import 'package:m_335_flutter/singletons/active_user_singleton.dart';
@@ -20,6 +21,7 @@ class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _aboutC;
   late DateTime _birthDate;
   UserMotivation? _motivation;
+  final UserService _userService = UserService();
 
   @override
   void initState() {
@@ -62,26 +64,38 @@ class _ProfilePageState extends State<ProfilePage> {
     child: child,
   );
 
-  void _save() {
+  Future<void> _save() async {
     final updated = UserModel(
       username: _user.username,
-      password: _user.password,
       email: _user.email,
       name: _nameC.text.trim(),
       aboutMe: _aboutC.text.trim(),
       friends: _user.friends,
       age: _birthDate,
       creationTime: _user.creationTime,
-      userMotivation: _motivation,
+      userMotivation: _motivation ?? UserMotivation.other,
+      totalSteps: _user.totalSteps,
     );
+
+    await _userService.updateUserData({
+      'name': updated.name,
+      'aboutMe': updated.aboutMe,
+      'age': updated.age,
+      'userMotivation': (updated.userMotivation ?? UserMotivation.other).name,
+    });
+
     ActiveUserSingleton().activeUser = updated;
     _user = updated;
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile saved')));
   }
 
   Future<void> _logout() async {
     ActiveUserSingleton().activeUser = null;
-    if (mounted) Navigator.of(context).pop();
+    await _userService.logout();
+    if (!mounted) return;
+    Navigator.of(context).pop();
   }
 
   Future<void> _pickBirthDate() async {

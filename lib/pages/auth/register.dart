@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:m_335_flutter/data_fetching/user_service.dart';
 import 'package:m_335_flutter/singletons/all_users_singleton.dart';
 import 'package:m_335_flutter/models/user_model.dart';
-import 'package:m_335_flutter/temporary_data/data_fetching.dart';
-import 'login.dart';
+import 'package:m_335_flutter/singletons/active_user_singleton.dart';
+import 'package:m_335_flutter/pages/home_page/home_page.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -13,6 +14,10 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  static const Color brandBlue = Color(0xFF123456);
+  static const Color accent = Color(0xFFF3F3E0);
+  final _userService = UserService();
+
   final _formKey = GlobalKey<FormState>();
   final _usernameC = TextEditingController();
   final _passwordC = TextEditingController();
@@ -29,29 +34,53 @@ class _RegisterState extends State<Register> {
     super.dispose();
   }
 
-  String? _validateRequired(String? v, String label) => (v == null || v.trim().isEmpty) ? 'Please enter $label' : null;
+  bool _is18OrOlder(DateTime d) {
+    final now = DateTime.now();
+    final cut = DateTime(now.year - 18, now.month, now.day);
+    return !d.isAfter(cut);
+  }
 
-  String? _validateEmail(String? v) {
+  String? _required(String? v, String label) => (v == null || v.trim().isEmpty) ? 'Please enter $label' : null;
+
+  String? _emailVal(String? v) {
     if (v == null || v.trim().isEmpty) return 'Please enter your email';
     final r = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return r.hasMatch(v) ? null : 'Invalid email format';
   }
 
-  bool _is18OrOlder(DateTime d) {
-    final now = DateTime.now();
-    final eighteen = DateTime(now.year - 18, now.month, now.day);
-    return d.isBefore(eighteen) || d.isAtSameMomentAs(eighteen);
+  String? _passwordVal(String? v) {
+    if (v == null || v.trim().isEmpty) return 'Please enter Password';
+    if (v.length < 6) return 'Password must be at least 6 characters';
+    if (!RegExp(r'\d').hasMatch(v)) {
+      return 'Password must contain at least one number';
+    }
+    return null;
   }
 
-  InputDecoration _dec(String label) =>
-      InputDecoration(labelText: label, border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)));
-
-  String _birthDateLabel(DateTime? d) {
+  String _fmt(DateTime? d) {
     if (d == null) return '';
     final dd = d.day.toString().padLeft(2, '0');
     final mm = d.month.toString().padLeft(2, '0');
     return '$dd.$mm.${d.year}';
   }
+
+  InputDecoration _inputStyle(String label) => InputDecoration(
+    labelText: label,
+    filled: true,
+    fillColor: Colors.white,
+    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+  );
+
+  Widget _card({required Widget child}) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: accent,
+      borderRadius: BorderRadius.circular(18),
+      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 6))],
+    ),
+    child: child,
+  );
 
   Future<void> _pickBirthDate() async {
     final now = DateTime.now();
@@ -62,28 +91,48 @@ class _RegisterState extends State<Register> {
     await showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
+      showDragHandle: true,
+      isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (_) {
-        return SizedBox(
-          height: 260,
-          child: Column(
-            children: [
-              const SizedBox(height: 12),
-              const Text('Select your birth date', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: initial,
-                  minimumDate: minDate,
-                  maximumDate: maxDate,
-                  onDateTimeChanged: (d) => setState(() => _birthDate = d),
-                ),
+      builder:
+          (_) => Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            child: SizedBox(
+              height: 360,
+              child: Column(
+                children: [
+                  const SizedBox(height: 6),
+                  const Text('Select your birth date', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.date,
+                      initialDateTime: initial.isAfter(maxDate) ? maxDate : initial,
+                      minimumDate: minDate,
+                      maximumDate: maxDate,
+                      onDateTimeChanged: (d) => setState(() => _birthDate = d),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: brandBlue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: const Text('Done', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        );
-      },
     );
+    setState(() {});
   }
 
   Future<void> _register() async {
@@ -107,115 +156,133 @@ class _RegisterState extends State<Register> {
 
     setState(() => _loading = true);
 
-    final user = UserModel(
-      username: username,
-      password: _passwordC.text.trim(),
-      email: _emailC.text.trim(),
-      name: '',
-      aboutMe: '',
-      friends: <UserModel>[],
-      age: _birthDate!,
-      creationTime: DateTime.now(),
-      userMotivation: null,
-    );
+    final String email = _emailC.text.trim();
+    final String password = _passwordC.text.trim();
+    final DateTime birthDate = _birthDate!;
 
     try {
-      userData.add(user);
+      final UserModel user = await _userService.createUserProfile(
+        email: email,
+        password: password,
+        username: username,
+        birthDate: birthDate,
+      );
+
       AllUsersSingleton().allUsers ??= [];
       AllUsersSingleton().allUsers!.add(user);
-      if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginPage()));
-      }
+      ActiveUserSingleton().activeUser = user;
+
+      if (!mounted) return;
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error while registering: $e')));
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error while registering: $e')));
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  Widget _header() {
-    return Column(
-      children: const [
-        Icon(Icons.person_add_alt_1, size: 60, color: Color(0xFF123456)),
-        SizedBox(height: 10),
-        Text('Create your account', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
+  Widget _title() => const Column(
+    children: [
+      Text('Create your account', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+      SizedBox(height: 6),
+      Text('Join WalkeRoo and start moving', style: TextStyle(fontSize: 14, color: Colors.black54)),
+    ],
+  );
 
-  Widget _field(
-    TextEditingController c,
-    String label, {
-    bool obscure = false,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
+  Widget _usernameField() => TextFormField(
+    controller: _usernameC,
+    enableSuggestions: false,
+    autocorrect: false,
+    autofillHints: const [],
+    validator: (v) => _required(v, 'Username'),
+    decoration: _inputStyle('Username'),
+  );
+
+  Widget _passwordField() => TextFormField(
+    enableSuggestions: false,
+    autocorrect: false,
+    autofillHints: const [],
+    controller: _passwordC,
+    obscureText: true,
+    validator: _passwordVal,
+    decoration: _inputStyle('Password'),
+  );
+
+  Widget _emailField() => TextFormField(
+    enableSuggestions: false,
+    autocorrect: false,
+    autofillHints: const [],
+    controller: _emailC,
+    keyboardType: TextInputType.emailAddress,
+    validator: _emailVal,
+    decoration: _inputStyle('Email'),
+  );
+
+  Widget _birthField() => GestureDetector(
+    onTap: _pickBirthDate,
+    child: AbsorbPointer(
       child: TextFormField(
-        controller: c,
-        obscureText: obscure,
-        keyboardType: keyboardType,
-        validator: validator,
-        decoration: _dec(label),
+        controller: TextEditingController(text: _fmt(_birthDate)),
+        validator: (_) => _birthDate == null ? 'Please select your birth date' : null,
+        decoration: _inputStyle('Birth Date'),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _birthDateField() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 15),
-      child: GestureDetector(
-        onTap: _pickBirthDate,
-        child: AbsorbPointer(
-          child: TextFormField(
-            controller: TextEditingController(text: _birthDateLabel(_birthDate)),
-            validator: (_) => _birthDate == null ? 'Please select your birth date' : null,
-            decoration: _dec('Birth Date'),
-          ),
-        ),
+  Widget _submit() => SizedBox(
+    height: 56,
+    child: ElevatedButton(
+      onPressed: _register,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: brandBlue,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        elevation: 2,
       ),
-    );
-  }
-
-  Widget _registerButton() {
-    if (_loading) return const CircularProgressIndicator();
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _register,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF123456),
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: const Text('Register', style: TextStyle(color: Colors.white, fontSize: 18)),
-      ),
-    );
-  }
+      child: const Text('Register', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)), centerTitle: true),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                _header(),
-                const SizedBox(height: 30),
-                _field(_usernameC, 'Username', validator: (v) => _validateRequired(v, 'Username')),
-                _field(_passwordC, 'Password', obscure: true, validator: (v) => _validateRequired(v, 'Password')),
-                _field(_emailC, 'Email', keyboardType: TextInputType.emailAddress, validator: _validateEmail),
-                _birthDateField(),
-                const SizedBox(height: 25),
-                _registerButton(),
-              ],
+      appBar: AppBar(
+        title: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFFDADADA),
+      ),
+      backgroundColor: const Color(0xFFDADADA),
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    _title(),
+                    const SizedBox(height: 24),
+                    _card(
+                      child: Column(
+                        children: [
+                          _usernameField(),
+                          const SizedBox(height: 12),
+                          _passwordField(),
+                          const SizedBox(height: 12),
+                          _emailField(),
+                          const SizedBox(height: 12),
+                          _birthField(),
+                          const SizedBox(height: 18),
+                          _loading ? const CircularProgressIndicator() : _submit(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
