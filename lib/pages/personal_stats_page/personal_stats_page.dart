@@ -72,7 +72,7 @@ class PersonalStatsPage extends StatelessWidget {
                             padding: const EdgeInsets.symmetric(vertical: 18),
                           ),
                           onPressed: () {
-                            // TODO: Navigate to Saved Routes page
+
                           },
                           child: const Text(
                             "See Saved Routes",
