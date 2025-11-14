@@ -2,9 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:m_335_flutter/models/map_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:WalkeRoo/models/map_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RouteController {
   static final RouteController _instance = RouteController._internal();
@@ -55,6 +54,7 @@ class RouteController {
           .now()
           .millisecondsSinceEpoch
           .toString(),
+      userUid: _auth.currentUser?.uid ?? '',
       startTime: start,
       endTime: end,
       stepCount: stepDiff,
