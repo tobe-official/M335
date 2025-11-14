@@ -57,7 +57,13 @@ flutter_launcher_icons:
   adaptive_icon_foreground: "assets/icon/icon.png"
   remove_alpha_ios: true
 
+flutter_native_splash:
+  color: "#ffffff"
+  android: true
+  ios: true
+
 dev_dependencies:
+  flutter_native_splash: ^2.4.2   # oder passend zu deinem Projekt
   flutter_test:
     sdk: flutter
 
