@@ -18,9 +18,7 @@ class PersonalStatsPage extends StatelessWidget {
   Widget _body() {
     final userService = UserService();
 
-    return Scaffold(
-      backgroundColor: Colors.grey[100],
-      body: SafeArea(
+    return SafeArea(
         child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
           stream: userService.getCurrentUserProfile(),
           builder: (context, snapshot) {
@@ -112,8 +110,7 @@ class PersonalStatsPage extends StatelessWidget {
             );
           },
         ),
-      ),
-    );
+          );
   }
 }
 
