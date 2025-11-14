@@ -40,7 +40,17 @@ class _HomePageState extends State<HomePage> {
       await _stepsStream.stop();
       final stepsAtEndingPoint = int.tryParse((_stepsStream.currentSteps ?? '0').toString()) ?? 0;
       await TrackingController().stopTracking(stepsAtEndingPoint);
-      await RouteController().addRoute(points: TrackingController().routePoints, stopPoints: TrackingController().stopPoints, stepDiff: TrackingController().getLastStepsDifference(),start: TrackingController().getLastTrackingTimes()[0]!, end: TrackingController().getLastTrackingTimes()[1]!);
+      final tracking = TrackingController();
+      await tracking.stopTracking(stepsAtEndingPoint);
+
+      await RouteController().addRoute(
+        points: tracking.routePoints,
+        stopPoints: tracking.stopPoints,
+        stepDiff: tracking.getLastStepsDifference(),
+        start: tracking.getLastTrackingTimes()[0]!,
+        end: tracking.getLastTrackingTimes()[1]!,
+      );
+
       await WakelockPlus.disable();
     }
 

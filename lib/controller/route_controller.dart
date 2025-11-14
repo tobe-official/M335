@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:m_335_flutter/models/map_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RouteController {
   static final RouteController _instance = RouteController._internal();
   factory RouteController() => _instance;
   RouteController._internal();
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final List<RouteModel> _routes = []; // TODO persist routes in local storage not online runtime
 
@@ -23,9 +26,14 @@ class RouteController {
     if (!await file.exists()) return;
 
     final jsonData = json.decode(await file.readAsString()) as List;
+
     _routes
       ..clear()
-      ..addAll(jsonData.map((e) => RouteModel.fromJson(e)));
+      ..addAll(
+          jsonData
+              .map((e) => RouteModel.fromJson(e))
+              .where((route) => route.userUid == _auth.currentUser?.uid)
+      );
   }
 
   Future<void> saveRoutes() async {
@@ -46,6 +54,7 @@ class RouteController {
           .now()
           .millisecondsSinceEpoch
           .toString(),
+      userUid: _auth.currentUser!.uid,
       startTime: start,
       endTime: end,
       stepCount: stepDiff,

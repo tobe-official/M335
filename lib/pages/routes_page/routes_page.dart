@@ -20,7 +20,7 @@ class _RoutesPageState extends State<RoutesPage> {
   void initState() {
     super.initState();
     _store = FMTCStore('mapStore')..manage.create();
-    RouteController().loadRoutes();
+    _routeController.loadRoutes();
   }
 
   @override
@@ -80,6 +80,20 @@ class _RoutesPageState extends State<RoutesPage> {
                       strokeWidth: 4,
                     ),
                   ],
+                ),
+                MarkerLayer(
+                  markers: _selectedRoute!.stopPoints.map((p) {
+                    return Marker(
+                      point: p,
+                      width: 20,
+                      height: 20,
+                      child: const Icon(
+                        Icons.circle,
+                        color: Colors.red,
+                        size: 14,
+                      ),
+                    );
+                  }).toList(),
                 ),
               ],
             ),

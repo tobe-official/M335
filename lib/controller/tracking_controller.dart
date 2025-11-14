@@ -53,7 +53,7 @@ class TrackingController {
           _lastMovementTime = DateTime.now();
         });
 
-    Timer.periodic(const Duration(seconds: 5), (timer) {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!_isTracking) {
         timer.cancel();
         return;
@@ -66,10 +66,7 @@ class TrackingController {
         if (diff.inSeconds >= 5 && stepsStream.currentStatus == 'stopped') {
           if (_routePoints.isNotEmpty) {
             final lastPos = _routePoints.last;
-
-            if (_stopPoints.isEmpty || _stopPoints.last != lastPos) {
               _stopPoints.add(lastPos);
-            }
           }
 
           _lastMovementTime = DateTime.now();
@@ -104,6 +101,4 @@ class TrackingController {
     if (_startSteps == null || _endSteps == null) return 0;
     return (_endSteps! - _startSteps!).clamp(0, 999999);
   }
-
-
 }
