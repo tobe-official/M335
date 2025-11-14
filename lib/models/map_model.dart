@@ -38,8 +38,8 @@ class RouteModel {
     points: (json['points'] as List)
         .map((p) => LatLng(p['lat'], p['lng']))
         .toList(),
-    stopPoints: (json['stopPoints'] as List)
-        .map((p) => LatLng(p['lat'], p['lng']))
-        .toList()
+   stopPoints: (json['stopPoints'] as List? ?? [])
+      .map((e) => LatLng(e['lat'], e['lng']))
+      .toList()
   );
 }
