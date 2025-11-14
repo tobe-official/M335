@@ -1,4 +1,4 @@
-name: m_335_flutter
+name: WalkeRoo
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -45,6 +45,17 @@ dependencies:
   flutter_map_tile_caching: ^10.1.1
   geolocator: ^14.0.1
   geocoding: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
+  path_provider: ^2.1.5
+
+# This changes the default Flutter Icon to be our custom Icon.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/icon.png"
+  remove_alpha_ios: true
 
 dev_dependencies:
   flutter_test:
@@ -69,8 +80,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/icon/icon.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

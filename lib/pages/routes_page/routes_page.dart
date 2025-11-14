@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:m_335_flutter/controller/route_controller.dart';
-import 'package:m_335_flutter/models/map_model.dart';
+import 'package:WalkeRoo/controller/route_controller.dart';
+import 'package:WalkeRoo/models/map_model.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 
 class RoutesPage extends StatefulWidget {
@@ -38,18 +38,14 @@ class _RoutesPageState extends State<RoutesPage> {
               itemBuilder: (context, i) {
                 final r = routes[i];
                 final duration = r.endTime.difference(r.startTime);
-                final durationText =
-                    '${duration.inMinutes} min ${duration.inSeconds % 60}s';
+                final durationText = '${duration.inMinutes} min ${duration.inSeconds % 60}s';
 
                 return ListTile(
                   title: Text(
                     'Route ${i + 1}\n${r.startTime.toLocal().toString().substring(0, 16)}',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(
-                    'Steps: ${r.stepCount} | Dauer: $durationText',
-                    style: const TextStyle(fontSize: 13),
-                  ),
+                  subtitle: Text('Steps: ${r.stepCount} | Dauer: $durationText', style: const TextStyle(fontSize: 13)),
                   onTap: () => setState(() => _selectedRoute = r),
                 );
               },

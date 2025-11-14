@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/pages/auth/register.dart';
+import 'package:WalkeRoo/pages/auth/register.dart';
 import 'login.dart';
 
 class AuthPage extends StatelessWidget {

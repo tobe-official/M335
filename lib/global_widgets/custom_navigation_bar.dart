@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/pages/home_page/home_page.dart';
-import 'package:m_335_flutter/pages/leaderboard_page/leaderboard_page.dart';
-import 'package:m_335_flutter/pages/map_page/map_page.dart';
-import 'package:m_335_flutter/pages/personal_stats_page/personal_stats_page.dart';
-import 'package:m_335_flutter/pages/profile_page/profile_page.dart';
+import 'package:WalkeRoo/pages/home_page/home_page.dart';
+import 'package:WalkeRoo/pages/leaderboard_page/leaderboard_page.dart';
+import 'package:WalkeRoo/pages/map_page/map_page.dart';
+import 'package:WalkeRoo/pages/personal_stats_page/personal_stats_page.dart';
+import 'package:WalkeRoo/pages/profile_page/profile_page.dart';
 
 class CustomNavigationBar extends StatefulWidget {
   const CustomNavigationBar({super.key, required this.initialIndexOfScreen});

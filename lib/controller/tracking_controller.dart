@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:m_335_flutter/pages/home_page/home_page_steps_stream.dart';
+import 'package:WalkeRoo/pages/home_page/home_page_steps_stream.dart';
 
 class TrackingController {
   late HomePageStepsStream stepsStream;
@@ -24,7 +24,7 @@ class TrackingController {
   bool get isTracking => _isTracking;
 
   List<LatLng> get routePoints => List.unmodifiable(_routePoints);
-  List<LatLng> get stopPoints  => List.unmodifiable(_stopPoints);
+  List<LatLng> get stopPoints => List.unmodifiable(_stopPoints);
 
   void attachStepsStream(HomePageStepsStream stream) {
     stepsStream = stream;
@@ -40,18 +40,14 @@ class TrackingController {
     _trackingStartTime = DateTime.now();
     _lastMovementTime = DateTime.now();
 
-    final settings = const LocationSettings(
-      accuracy: LocationAccuracy.best,
-      distanceFilter: 5,
-    );
+    final settings = const LocationSettings(accuracy: LocationAccuracy.best, distanceFilter: 5);
 
-    _positionSub =
-        Geolocator.getPositionStream(locationSettings: settings).listen((pos) {
-          final point = LatLng(pos.latitude, pos.longitude);
-          _routePoints.add(point);
+    _positionSub = Geolocator.getPositionStream(locationSettings: settings).listen((pos) {
+      final point = LatLng(pos.latitude, pos.longitude);
+      _routePoints.add(point);
 
-          _lastMovementTime = DateTime.now();
-        });
+      _lastMovementTime = DateTime.now();
+    });
 
     Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!_isTracking) {
