@@ -9,7 +9,7 @@ class RouteController {
   factory RouteController() => _instance;
   RouteController._internal();
 
-  final List<RouteModel> _routes = [];
+  final List<RouteModel> _routes = []; // TODO persist routes in local storage not online runtime
 
   List<RouteModel> get allRoutes => List.unmodifiable(_routes);
 
@@ -36,6 +36,7 @@ class RouteController {
 
   Future<void> addRoute({
     required List<LatLng> points,
+    required List<LatLng> stopPoints,
     required int stepDiff,
     required DateTime start,
     required DateTime end,
@@ -49,12 +50,16 @@ class RouteController {
       endTime: end,
       stepCount: stepDiff,
       points: points,
+      stopPoints: stopPoints,
     );
 
     if (isValidRoute(route)) {
       _routes.add(route);
-    await saveRoutes();
-  } else {
+      await saveRoutes();
+    } else {
+      print(route.stepCount);
+      print(route.points.toString());
+      print(route.stopPoints.toString());
       print('Invalid Route. Won`t be saved.');
     }
 }
@@ -66,6 +71,6 @@ class RouteController {
 
   bool isValidRoute(RouteModel route) {
     final duration = route.endTime.difference(route.startTime);
-    return route.points.isNotEmpty && route.startTime.isBefore(route.endTime) && route.stepCount > 0 && duration.inMinutes > 1;
+    return route.startTime.isBefore(route.endTime) && route.stepCount > 0 && duration.inSeconds > 60;
   }
 }

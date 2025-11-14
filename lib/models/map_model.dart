@@ -6,6 +6,7 @@ class RouteModel {
   final DateTime endTime;
   final int stepCount;
   final List<LatLng> points;
+  final List<LatLng> stopPoints;
 
   RouteModel({
     required this.id,
@@ -13,6 +14,7 @@ class RouteModel {
     required this.endTime,
     required this.stepCount,
     required this.points,
+    required this.stopPoints,
   });
 
   Map<String, dynamic> toJson() => {
@@ -21,6 +23,9 @@ class RouteModel {
     'endTime': endTime.toIso8601String(),
     'stepCount': stepCount,
     'points': points
+        .map((p) => {'lat': p.latitude, 'lng': p.longitude})
+        .toList(),
+    'stopPoints': stopPoints
         .map((p) => {'lat': p.latitude, 'lng': p.longitude})
         .toList(),
   };
@@ -33,5 +38,8 @@ class RouteModel {
     points: (json['points'] as List)
         .map((p) => LatLng(p['lat'], p['lng']))
         .toList(),
+    stopPoints: (json['stopPoints'] as List)
+        .map((p) => LatLng(p['lat'], p['lng']))
+        .toList()
   );
 }

@@ -20,12 +20,7 @@ class _RoutesPageState extends State<RoutesPage> {
   void initState() {
     super.initState();
     _store = FMTCStore('mapStore')..manage.create();
-    _load();
-  }
-
-  Future<void> _load() async {
-    await _routeController.loadRoutes();
-    setState(() {});
+    RouteController().loadRoutes();
   }
 
   @override
@@ -63,7 +58,7 @@ class _RoutesPageState extends State<RoutesPage> {
 
           Expanded(
             flex: 2,
-            child: _selectedRoute == null || RouteController().isValidRoute(_selectedRoute!)
+            child: _selectedRoute == null || !RouteController().isValidRoute(_selectedRoute!)
                 ? const Center(child: Text('Choose a route to display'))
                 : FlutterMap(
               options: MapOptions(
