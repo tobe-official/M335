@@ -1,4 +1,4 @@
-import 'package:m_335_flutter/models/user_motivation_enum_model.dart';
+import 'package:WalkeRoo/models/user_motivation_enum_model.dart';
 
 enum UserMotivation { running, gym, cycling, hiking, yoga, swimming, walking, dancing, climbing, other }
 

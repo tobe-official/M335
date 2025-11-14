@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
+import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 
 class MapPage extends StatelessWidget {
   const MapPage({super.key});
