@@ -38,15 +38,13 @@ class FriendsService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user is logged in');
 
-    final userDoc =
-    await _firestore.collection('users').doc(user.uid).get();
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
     final data = userDoc.data();
     if (data == null) return [];
 
     final List<dynamic> rawFriends = data['friendsUUIDs'] ?? [];
-    final List<String> friendIds =
-    rawFriends.whereType<String>().toList();
+    final List<String> friendIds = rawFriends.whereType<String>().toList();
 
     if (friendIds.isEmpty) return [];
 
@@ -55,16 +53,10 @@ class FriendsService {
     const int batchSize = 10;
     for (var i = 0; i < friendIds.length; i += batchSize) {
       final chunk = friendIds.skip(i).take(batchSize).toList();
-      final query = await _firestore
-          .collection('users')
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get();
+      final query = await _firestore.collection('users').where(FieldPath.documentId, whereIn: chunk).get();
 
       for (var doc in query.docs) {
-        final item = <String, dynamic>{
-          'id': doc.id,
-          ...?doc.data(),
-        };
+        final item = <String, dynamic>{'id': doc.id, ...doc.data()};
         results.add(item);
       }
     }
