@@ -2,17 +2,41 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:m_335_flutter/data_fetching/user_service.dart';
 import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
+import 'package:m_335_flutter/controller/route_controller.dart';
+import 'package:m_335_flutter/pages/routes_page/routes_page.dart';
 import 'package:m_335_flutter/pages/personal_stats_page/statRow.dart';
 
-class PersonalStatsPage extends StatelessWidget {
+class PersonalStatsPage extends StatefulWidget {
   const PersonalStatsPage({super.key});
+
+  @override
+  State<PersonalStatsPage> createState() => _PersonalStatsPageState();
+}
+
+class _PersonalStatsPageState extends State<PersonalStatsPage> {
+  final _routeController = RouteController();
+  bool _isLoading = false;
+
+  Future<void> _openRoutesPage(BuildContext context) async {
+    setState(() => _isLoading = true);
+    await _routeController.loadRoutes();
+    setState(() => _isLoading = false);
+
+    if (context.mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const RoutesPage()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0XFFD2D2D2),
-        body: _body(),
-        bottomNavigationBar: CustomNavigationBar(initialIndexOfScreen: 1));
+      body: _body(),
+      bottomNavigationBar: CustomNavigationBar(initialIndexOfScreen: 1),
+    );
   }
 
   Widget _body() {
@@ -23,13 +47,15 @@ class PersonalStatsPage extends StatelessWidget {
         future: Future.wait([
           userService.getCurrentUserProfile().first,
           userService.getTotalStepsLast7Days(),
+          _routeController.loadRoutes(),
         ]),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final userSnap = snapshot.data![0] as DocumentSnapshot<Map<String, dynamic>>;
+          final userSnap =
+              snapshot.data![0] as DocumentSnapshot<Map<String, dynamic>>;
           final totalStepsWeek = snapshot.data![1] as int;
 
           if (!userSnap.exists) {
@@ -45,13 +71,25 @@ class PersonalStatsPage extends StatelessWidget {
           double totalDistanceKmToday =
               (totalStepsToday * averageStepLengthMeters) / 1000;
 
-          double distanceWeekKm =
-              (totalStepsWeek * averageStepLengthMeters) / 1000;
+          final routesToday = _routeController.getRoutesFromToday();
+          final totalMinutesToday = _routeController.getTotalMinutesFromToday();
 
-          double walkingPaceKmPerDay = distanceWeekKm / 7.0;
+          double kmTodayFromRoutes = 0;
+
+          for (var r in routesToday) {
+            kmTodayFromRoutes += (r.stepCount * averageStepLengthMeters) / 1000;
+          }
+
+          double paceKmPerHour =
+              totalMinutesToday > 0
+                  ? kmTodayFromRoutes / (totalMinutesToday / 60)
+                  : 0;
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -64,11 +102,18 @@ class PersonalStatsPage extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 StatRow(label: "Total steps today:", value: "$totalStepsToday"),
-                StatRow(label: "Total steps last week:", value: "$totalStepsWeek"),
-                StatRow(label: "Walking pace (km/day):",
-                    value: walkingPaceKmPerDay.toStringAsFixed(2)),
-                StatRow(label: "Total KM today:",
-                    value: "${totalDistanceKmToday.toStringAsFixed(2)} KM"),
+                StatRow(
+                  label: "Total steps last week:",
+                  value: "$totalStepsWeek",
+                ),
+                StatRow(
+                  label: "Walking pace (km/h):",
+                  value: paceKmPerHour.toStringAsFixed(2),
+                ),
+                StatRow(
+                  label: "Total KM today:",
+                  value: "${totalDistanceKmToday.toStringAsFixed(2)} KM",
+                ),
 
                 const Spacer(),
 
@@ -85,7 +130,9 @@ class PersonalStatsPage extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 18),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          _openRoutesPage(context);
+                        },
                         child: const Text(
                           "See Saved Routes",
                           style: TextStyle(
@@ -105,6 +152,4 @@ class PersonalStatsPage extends StatelessWidget {
       ),
     );
   }
-
 }
-
