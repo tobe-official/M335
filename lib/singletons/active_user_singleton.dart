@@ -1,4 +1,4 @@
-import 'package:m_335_flutter/models/user_model.dart';
+import 'package:WalkeRoo/models/user_model.dart';
 
 class ActiveUserSingleton {
   static final ActiveUserSingleton _activeUserSingleton = ActiveUserSingleton._internal();

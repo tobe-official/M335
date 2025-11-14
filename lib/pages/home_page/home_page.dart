@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
+import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'home_page_steps_stream.dart';
-import 'package:m_335_flutter/controller/tracking_controller.dart';
-import 'package:m_335_flutter/controller/route_controller.dart';
+import 'package:WalkeRoo/controller/tracking_controller.dart';
+import 'package:WalkeRoo/controller/route_controller.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,7 +40,13 @@ class _HomePageState extends State<HomePage> {
       await _stepsStream.stop();
       final stepsAtEndingPoint = int.tryParse((_stepsStream.currentSteps ?? '0').toString()) ?? 0;
       await TrackingController().stopTracking(stepsAtEndingPoint);
-      await RouteController().addRoute(points: TrackingController().routePoints, stopPoints: TrackingController().stopPoints, stepDiff: TrackingController().getLastStepsDifference(),start: TrackingController().getLastTrackingTimes()[0]!, end: TrackingController().getLastTrackingTimes()[1]!);
+      await RouteController().addRoute(
+        points: TrackingController().routePoints,
+        stopPoints: TrackingController().stopPoints,
+        stepDiff: TrackingController().getLastStepsDifference(),
+        start: TrackingController().getLastTrackingTimes()[0]!,
+        end: TrackingController().getLastTrackingTimes()[1]!,
+      );
       await WakelockPlus.disable();
     }
 
@@ -48,7 +54,6 @@ class _HomePageState extends State<HomePage> {
       _startWalking = !startWalking;
     });
   }
-
 
   @override
   Widget build(BuildContext context) {

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
-import 'package:flutter/material.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
-import 'package:m_335_flutter/controller/route_controller.dart';
-import 'package:m_335_flutter/pages/routes_page/routes_page.dart';
+import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
+import 'package:WalkeRoo/controller/route_controller.dart';
+import 'package:WalkeRoo/pages/routes_page/routes_page.dart';
 
 class PersonalStatsPage extends StatefulWidget {
   const PersonalStatsPage({super.key});
@@ -22,10 +20,7 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
     setState(() => _isLoading = false);
 
     if (context.mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const RoutesPage()),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const RoutesPage()));
     }
   }
 
@@ -38,10 +33,7 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Deine persönlichen Statistiken',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
+            const Text('Deine persönlichen Statistiken', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
             const SizedBox(height: 30),
             ElevatedButton.icon(
               onPressed: _isLoading ? null : () => _openRoutesPage(context),
@@ -54,9 +46,7 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
                 backgroundColor: const Color(0xFF123456),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
             ),
           ],

@@ -1,4 +1,4 @@
-import 'package:m_335_flutter/enums/user_motivation_enum.dart';
+import 'package:WalkeRoo/enums/user_motivation_enum.dart';
 
 class UserModel {
   const UserModel({

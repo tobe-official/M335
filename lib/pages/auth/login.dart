@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:m_335_flutter/pages/home_page/home_page.dart';
-import 'package:m_335_flutter/singletons/active_user_singleton.dart';
-import 'package:m_335_flutter/models/user_model.dart';
-import 'package:m_335_flutter/data_fetching/user_service.dart';
+import 'package:WalkeRoo/pages/home_page/home_page.dart';
+import 'package:WalkeRoo/singletons/active_user_singleton.dart';
+import 'package:WalkeRoo/models/user_model.dart';
+import 'package:WalkeRoo/data_fetching/user_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

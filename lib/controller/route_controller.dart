@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:m_335_flutter/models/map_model.dart';
+import 'package:WalkeRoo/models/map_model.dart';
 
 class RouteController {
   static final RouteController _instance = RouteController._internal();
@@ -42,10 +42,7 @@ class RouteController {
     required DateTime end,
   }) async {
     final route = RouteModel(
-      id: DateTime
-          .now()
-          .millisecondsSinceEpoch
-          .toString(),
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       startTime: start,
       endTime: end,
       stepCount: stepDiff,
@@ -62,7 +59,7 @@ class RouteController {
       print(route.stopPoints.toString());
       print('Invalid Route. Won`t be saved.');
     }
-}
+  }
 
   Future<void> deleteRoute(String id) async {
     _routes.removeWhere((r) => r.id == id);
