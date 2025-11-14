@@ -66,6 +66,6 @@ class RouteController {
 
   bool isValidRoute(RouteModel route) {
     final duration = route.endTime.difference(route.startTime);
-    return route.points.isEmpty && route.startTime.isBefore(route.endTime) && route.stepCount < 0 && duration.inMinutes < 1;
+    return route.points.isNotEmpty && route.startTime.isBefore(route.endTime) && route.stepCount > 0 && duration.inMinutes > 1;
   }
 }
