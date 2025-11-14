@@ -20,7 +20,7 @@ class _RoutesPageState extends State<RoutesPage> {
   void initState() {
     super.initState();
     _store = FMTCStore('mapStore')..manage.create();
-    RouteController().loadRoutes();
+    _routeController.loadRoutes();
   }
 
   @override
@@ -54,24 +54,45 @@ class _RoutesPageState extends State<RoutesPage> {
 
           Expanded(
             flex: 2,
-            child:
-                _selectedRoute == null || !RouteController().isValidRoute(_selectedRoute!)
-                    ? const Center(child: Text('Choose a route to display'))
-                    : FlutterMap(
-                      options: MapOptions(initialCenter: _selectedRoute!.points.first, initialZoom: 14),
-                      children: [
-                        TileLayer(
-                          urlTemplate: 'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=1gzJrHLaOPeEElnmEFEe',
-                          userAgentPackageName: 'ch.m335.walkeroo',
-                          tileProvider: _store.getTileProvider(),
-                        ),
-                        PolylineLayer(
-                          polylines: [
-                            Polyline(points: _selectedRoute!.points, color: Colors.blueAccent, strokeWidth: 4),
-                          ],
-                        ),
-                      ],
+            child: _selectedRoute == null || !RouteController().isValidRoute(_selectedRoute!)
+                ? const Center(child: Text('Choose a route to display'))
+                : FlutterMap(
+              options: MapOptions(
+                initialCenter: _selectedRoute!.points.first,
+                initialZoom: 14,
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate:
+                  'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=1gzJrHLaOPeEElnmEFEe',
+                  userAgentPackageName: 'ch.m335.walkeroo',
+                  tileProvider: _store.getTileProvider(),
+                ),
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: _selectedRoute!.points,
+                      color: Colors.blueAccent,
+                      strokeWidth: 4,
                     ),
+                  ],
+                ),
+                MarkerLayer(
+                  markers: _selectedRoute!.stopPoints.map((p) {
+                    return Marker(
+                      point: p,
+                      width: 20,
+                      height: 20,
+                      child: const Icon(
+                        Icons.circle,
+                        color: Colors.red,
+                        size: 14,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
         ],
       ),
