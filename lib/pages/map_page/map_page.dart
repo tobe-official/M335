@@ -122,7 +122,6 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ],
                 ),
-
               if (TrackingController().routePoints.isNotEmpty)
                 PolylineLayer(
                   polylines: [
@@ -133,7 +132,21 @@ class _MapPageState extends State<MapPage> {
                     ),
                   ],
                 ),
-
+              if (TrackingController().stopPoints.isNotEmpty)
+                MarkerLayer(
+                  markers: TrackingController().stopPoints.map((p) {
+                    return Marker(
+                      point: p,
+                      width: 20,
+                      height: 20,
+                      child: const Icon(
+                        Icons.circle,
+                        color: Colors.red,
+                        size: 14,
+                      ),
+                    );
+                  }).toList(),
+                ),
               if (_currentPosition != null)
                 MarkerLayer(
                   markers: [

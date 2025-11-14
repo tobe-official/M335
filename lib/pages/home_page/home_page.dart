@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _stepsStream.init();
+    TrackingController().attachStepsStream(_stepsStream);
   }
 
   @override
