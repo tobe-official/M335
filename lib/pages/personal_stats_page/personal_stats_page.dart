@@ -1,10 +1,12 @@
+import 'package:WalkeRoo/pages/personal_stats_page/statRow.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/data_fetching/user_service.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
-import 'package:m_335_flutter/controller/route_controller.dart';
-import 'package:m_335_flutter/pages/routes_page/routes_page.dart';
-import 'package:m_335_flutter/pages/personal_stats_page/statRow.dart';
+import 'package:flutter/material.dart';
+import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
+import 'package:WalkeRoo/controller/route_controller.dart';
+import 'package:WalkeRoo/pages/routes_page/routes_page.dart';
+
+import '../../data_fetching/user_service.dart';
 
 class PersonalStatsPage extends StatefulWidget {
   const PersonalStatsPage({super.key});
@@ -23,10 +25,7 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
     setState(() => _isLoading = false);
 
     if (context.mounted) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const RoutesPage()),
-      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const RoutesPage()));
     }
   }
 

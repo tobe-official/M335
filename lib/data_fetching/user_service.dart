@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:m_335_flutter/enums/user_motivation_enum.dart';
-import 'package:m_335_flutter/models/user_model.dart';
+import 'package:WalkeRoo/enums/user_motivation_enum.dart';
+import 'package:WalkeRoo/models/user_model.dart';
 
 class UserService {
   final FirebaseAuth _auth = FirebaseAuth.instance;

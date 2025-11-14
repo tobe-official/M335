@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:m_335_flutter/controller/tracking_controller.dart';
-
+import 'package:WalkeRoo/controller/tracking_controller.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key});
@@ -19,9 +18,8 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final MapController _mapController = MapController();
-  static const mapTilerKey = '1gzJrHLaOPeEElnmEFEe';
-  static const _urlTemplate =
-      'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=$mapTilerKey';
+  static const mapTilerKey = '';
+  static const _urlTemplate = 'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=$mapTilerKey';
 
   LatLng? _currentPosition;
   String _locationName = 'Loading location...';
@@ -29,7 +27,6 @@ class _MapPageState extends State<MapPage> {
 
   final List<LatLng> _routePoints = [];
   StreamSubscription<Position>? _positionStreamSub;
-  bool _trackingActive = false;
   DateTime? _lastLocationUpdate;
 
   @override
@@ -65,9 +62,7 @@ class _MapPageState extends State<MapPage> {
       return;
     }
 
-    final position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    final position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
     _updateLocation(position);
   }
@@ -78,8 +73,7 @@ class _MapPageState extends State<MapPage> {
     _mapController.move(latLng, 17);
 
     // all 10 seconds we update the "header" with the current location name
-    if (_lastLocationUpdate == null ||
-        DateTime.now().difference(_lastLocationUpdate!) > const Duration(seconds: 1)) {
+    if (_lastLocationUpdate == null || DateTime.now().difference(_lastLocationUpdate!) > const Duration(seconds: 1)) {
       _lastLocationUpdate = DateTime.now();
       final placemarks = await placemarkFromCoordinates(latLng.latitude, latLng.longitude);
       if (placemarks.isNotEmpty) {
@@ -102,10 +96,7 @@ class _MapPageState extends State<MapPage> {
         children: [
           FlutterMap(
             mapController: _mapController,
-            options: MapOptions(
-              initialCenter: _currentPosition ?? const LatLng(46.948, 7.4474),
-              initialZoom: 15,
-            ),
+            options: MapOptions(initialCenter: _currentPosition ?? const LatLng(46.948, 7.4474), initialZoom: 15),
             children: [
               TileLayer(
                 urlTemplate: _urlTemplate,
@@ -113,39 +104,24 @@ class _MapPageState extends State<MapPage> {
                 tileProvider: _store.getTileProvider(),
               ),
               if (_routePoints.isNotEmpty)
-                PolylineLayer(
-                  polylines: [
-                    Polyline(
-                      points: _routePoints,
-                      color: Colors.blueAccent,
-                      strokeWidth: 3,
-                    ),
-                  ],
-                ),
+                PolylineLayer(polylines: [Polyline(points: _routePoints, color: Colors.blueAccent, strokeWidth: 3)]),
               if (TrackingController().routePoints.isNotEmpty)
                 PolylineLayer(
                   polylines: [
-                    Polyline(
-                      points: TrackingController().routePoints,
-                      color: Colors.blueAccent,
-                      strokeWidth: 5,
-                    ),
+                    Polyline(points: TrackingController().routePoints, color: Colors.blueAccent, strokeWidth: 5),
                   ],
                 ),
               if (TrackingController().stopPoints.isNotEmpty)
                 MarkerLayer(
-                  markers: TrackingController().stopPoints.map((p) {
-                    return Marker(
-                      point: p,
-                      width: 20,
-                      height: 20,
-                      child: const Icon(
-                        Icons.circle,
-                        color: Colors.red,
-                        size: 14,
-                      ),
-                    );
-                  }).toList(),
+                  markers:
+                      TrackingController().stopPoints.map((p) {
+                        return Marker(
+                          point: p,
+                          width: 20,
+                          height: 20,
+                          child: const Icon(Icons.circle, color: Colors.red, size: 14),
+                        );
+                      }).toList(),
                 ),
               if (_currentPosition != null)
                 MarkerLayer(
@@ -154,8 +130,7 @@ class _MapPageState extends State<MapPage> {
                       point: _currentPosition!,
                       width: 40,
                       height: 40,
-                      child: const Icon(Icons.my_location,
-                          color: Colors.redAccent, size: 36),
+                      child: const Icon(Icons.my_location, color: Colors.redAccent, size: 36),
                     ),
                   ],
                 ),
@@ -175,11 +150,7 @@ class _MapPageState extends State<MapPage> {
               child: Text(
                 'Current location - $_locationName',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w600),
               ),
             ),
           ),

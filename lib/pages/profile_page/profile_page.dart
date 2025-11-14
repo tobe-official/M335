@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:m_335_flutter/data_fetching/user_service.dart';
-import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
-import 'package:m_335_flutter/models/user_model.dart';
-import 'package:m_335_flutter/singletons/active_user_singleton.dart';
-import 'package:m_335_flutter/enums/user_motivation_enum.dart';
+import 'package:WalkeRoo/data_fetching/user_service.dart';
+import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
+import 'package:WalkeRoo/models/user_model.dart';
+import 'package:WalkeRoo/singletons/active_user_singleton.dart';
+import 'package:WalkeRoo/enums/user_motivation_enum.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
