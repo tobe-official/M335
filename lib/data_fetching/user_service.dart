@@ -13,6 +13,7 @@ class UserService {
     await _firestore.collection('users').doc(user.uid).set({
       'name': name,
       'email': email,
+      'friendsUUIDs': [],
       'createdAt': FieldValue.serverTimestamp(),
       'totalSteps': 0,
     });
