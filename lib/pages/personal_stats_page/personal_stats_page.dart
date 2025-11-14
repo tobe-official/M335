@@ -19,79 +19,92 @@ class PersonalStatsPage extends StatelessWidget {
     final userService = UserService();
 
     return SafeArea(
-        child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-          stream: userService.getCurrentUserProfile(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+      child: FutureBuilder(
+        future: Future.wait([
+          userService.getCurrentUserProfile().first,
+          userService.getTotalStepsLast7Days(),
+        ]),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            if (!snapshot.hasData || !snapshot.data!.exists) {
-              return const Center(
-                  child: Text('No user data found', style: TextStyle(fontSize: 18)));
-            }
+          final userSnap = snapshot.data![0] as DocumentSnapshot<Map<String, dynamic>>;
+          final totalStepsWeek = snapshot.data![1] as int;
 
-            final userData = snapshot.data!.data()!;
-            final totalSteps = userData['totalSteps'] ?? 0;
-            final totalDistanceKm = userData['totalDistanceKm'] ?? 0.0;
-            final walkingPace = userData['walkingPace'] ?? 0.0;
-            final totalStepsWeek = userData['totalStepsWeek'] ?? 0;
+          if (!userSnap.exists) {
+            return const Center(
+              child: Text('No user data found', style: TextStyle(fontSize: 18)),
+            );
+          }
 
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 32),
-                  const Text(
-                    "Here are your stats:",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-                  ),
-                  const Divider(thickness: 1, height: 20),
+          final userData = userSnap.data()!;
+          final totalStepsToday = userData['totalSteps'] ?? 0;
 
-                  const SizedBox(height: 20),
+          const double averageStepLengthMeters = 0.78;
+          double totalDistanceKmToday =
+              (totalStepsToday * averageStepLengthMeters) / 1000;
 
-                  StatRow(label: "Total steps today:", value: "$totalSteps"),
-                  StatRow(label: "Total steps last week:", value: "$totalStepsWeek"),
-                  StatRow(label: "Walking pace (km/h):", value: "$walkingPace km/h"),
-                  StatRow(label: "Total KM today:", value: "$totalDistanceKm KM"),
+          double distanceWeekKm =
+              (totalStepsWeek * averageStepLengthMeters) / 1000;
 
-                  const Spacer(),
+          double walkingPaceKmPerDay = distanceWeekKm / 7.0;
 
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 80.0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 18),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 32),
+                const Text(
+                  "Here are your stats:",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                ),
+                const Divider(thickness: 1, height: 20),
+                const SizedBox(height: 20),
+
+                StatRow(label: "Total steps today:", value: "$totalStepsToday"),
+                StatRow(label: "Total steps last week:", value: "$totalStepsWeek"),
+                StatRow(label: "Walking pace (km/day):",
+                    value: walkingPaceKmPerDay.toStringAsFixed(2)),
+                StatRow(label: "Total KM today:",
+                    value: "${totalDistanceKmToday.toStringAsFixed(2)} KM"),
+
+                const Spacer(),
+
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 80.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          onPressed: () {
-
-                          },
-                          child: const Text(
-                            "See Saved Routes",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                        ),
+                        onPressed: () {},
+                        child: const Text(
+                          "See Saved Routes",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+              ],
+            ),
           );
+        },
+      ),
+    );
   }
+
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:m_335_flutter/global_widgets/custom_navigation_bar.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../data_fetching/user_service.dart';
 import 'home_page_steps_stream.dart';
 
 class HomePage extends StatefulWidget {
@@ -29,8 +30,15 @@ class _HomePageState extends State<HomePage> {
   void _onButtonPressed(bool startWalking) async {
     if (startWalking) {
       await _stepsStream.start();
+      _stepsStream.markStart();
       await WakelockPlus.enable();
     } else {
+      final steps = _stepsStream.stepsSinceStart();
+
+      if (steps > 0) {
+        await UserService().addActivity(steps);
+      }
+
       await _stepsStream.stop();
       await WakelockPlus.disable();
     }
