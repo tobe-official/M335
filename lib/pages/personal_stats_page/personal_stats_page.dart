@@ -42,25 +42,6 @@ class PersonalStatsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Mo 27.01.25",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                      Row(
-                        children: const [
-                          Icon(Icons.signal_cellular_alt, size: 18),
-                          SizedBox(width: 4),
-                          Text("5G"),
-                          SizedBox(width: 4),
-                          Icon(Icons.battery_full, size: 20),
-                        ],
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 32),
                   const Text(
                     "Here are your stats:",
