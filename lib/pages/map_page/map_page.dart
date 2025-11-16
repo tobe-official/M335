@@ -19,7 +19,7 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   final MapController _mapController = MapController();
 
-  static const mapTilerKey = '';
+  static const mapTilerKey = 'qOEvgITUDNZbmeiArIhP';
   static const _urlTemplate = 'https://api.maptiler.com/maps/base-v4/{z}/{x}/{y}.png?key=$mapTilerKey';
 
   LatLng? _currentPosition;
