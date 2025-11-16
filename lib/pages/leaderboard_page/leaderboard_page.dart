@@ -10,71 +10,94 @@ class LeaderboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFDADADA),
-      body: _body(),
       appBar: AppBar(
         backgroundColor: const Color(0xFFDADADA),
         elevation: 0,
-          leading: IconButton(
-            onPressed: () => _onNotification(context),
-            icon: const Icon(Icons.mail_outline),
-          ),
-          actions: [
-            IconButton(
-              onPressed: () => _onAddFriends(context),
-              icon: const Icon(Icons.person_add_alt_1),
-            )
-          ]
+        leading: IconButton(
+          onPressed: () => _onNotification(context),
+          icon: const Icon(Icons.mail_outline),
+        ),
+        actions: [
+          IconButton(
+            onPressed: () => _onAddFriends(context),
+            icon: const Icon(Icons.person_add_alt_1),
+          )
+        ],
       ),
+      body: _body(context),
       bottomNavigationBar: CustomNavigationBar(initialIndexOfScreen: 3),
     );
   }
 
-  Widget _body() {
-    final leaderboard = [
-      {'name': 'Jana L.', 'distance': '23km'},
-      {'name': 'Jona P.', 'distance': '22km'},
-      {'name': 'Jano W.', 'distance': '21km'},
-      {'name': 'Jona P.', 'distance': '20km'},
-      {'name': 'Jonas D.', 'distance': '19km'},
-      {'name': 'Lina P.', 'distance': '18km'},
-    ];
-    return SafeArea(
-      child: Column(
-        children: [
-          const SizedBox(height: 30),
-          const Icon(Icons.emoji_events, size: 80, color: Colors.black),
-          const SizedBox(height: 20),
-          Expanded(
-            child: ListView.builder(
-              itemCount: leaderboard.length,
-              itemBuilder: (context, index) {
-                final item = leaderboard[index];
-                final isHighlighted = index == 3;
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 40, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isHighlighted ? const Color(0xFFB9E2A5) : const Color(0xFFFFFCD6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ListTile(
-                    leading: Text('${index + 1}.', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    title: Text(item['name']!, style: const TextStyle(fontWeight: FontWeight.w500)),
-                    trailing: Text(item['distance']!, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  ),
-                );
-              },
-            ),
+
+  Widget _body(BuildContext context) {
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: FriendsService().getLeaderboardWithUser(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final leaderboard = snapshot.data!;
+        final currentUid = FriendsService().currentUserUid;
+
+        return SafeArea(
+          child: Column(
+            children: [
+              const SizedBox(height: 30),
+              const Icon(Icons.emoji_events, size: 80, color: Colors.black),
+              const SizedBox(height: 20),
+
+              // LIST
+              Expanded(
+                child: ListView.builder(
+                  itemCount: leaderboard.length,
+                  itemBuilder: (context, index) {
+                    final user = leaderboard[index];
+
+                    final isCurrentUser = (user['id'] == currentUid);
+
+                    return Container(
+                      margin:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isCurrentUser
+                            ? const Color(0xFFB9E2A5)
+                            : const Color(0xFFFFFCD6),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ListTile(
+                        leading: Text(
+                          '${index + 1}.',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        title: Text(
+                          user['username'] ?? "Unknown User",
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        trailing: Text(
+                          "${user['totalSteps'] ?? 0}",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const Divider(thickness: 1),
+              const SizedBox(height: 10),
+              const Text(
+                'This is the leaderboard of the last 7 Days',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+            ],
           ),
-          const Divider(thickness: 1),
-          const SizedBox(height: 10),
-          const Text(
-            'This is the leaderboard of the last 7 Days',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 32),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 30),
-        ],
-      ),
+        );
+      },
     );
   }
 

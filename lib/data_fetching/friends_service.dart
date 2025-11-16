@@ -5,6 +5,8 @@ class FriendsService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  String? get currentUserUid => _auth.currentUser?.uid;
+
   Future<void> sendFriendRequest(String toUsername) async {
     final currentUser = _auth.currentUser;
     if (currentUser == null) throw Exception('Not logged in');
@@ -72,4 +74,39 @@ class FriendsService {
         .delete();
   }
 
+  Future<List<Map<String, dynamic>>> getLeaderboardWithUser() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('Not logged in');
+
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final userData = userDoc.data() ?? {};
+
+    final friends = userData['friendsUids']?.cast<String>() ?? [];
+
+    final allIds = [...friends, user.uid];
+
+    final List<Map<String, dynamic>> results = [];
+
+    const int batchSize = 10;
+    for (var i = 0; i < allIds.length; i += batchSize) {
+      final chunk = allIds.skip(i).take(batchSize).toList();
+
+      final query = await _firestore
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+
+      for (var doc in query.docs) {
+        results.add({'id': doc.id, ...doc.data()});
+      }
+    }
+
+    results.sort((a, b) {
+      final aSteps = (a['totalSteps'] ?? 0) as int;
+      final bSteps = (b['totalSteps'] ?? 0) as int;
+      return bSteps.compareTo(aSteps);
+    });
+
+    return results;
+  }
 }
