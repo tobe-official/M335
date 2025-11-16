@@ -5,6 +5,8 @@ import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:WalkeRoo/models/user_model.dart';
 import 'package:WalkeRoo/singletons/active_user_singleton.dart';
 import 'package:WalkeRoo/enums/user_motivation_enum.dart';
+import '../../storage/local_user_storage.dart';
+import '../auth/auth_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -92,10 +94,19 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _logout() async {
-    ActiveUserSingleton().activeUser = null;
+    ActiveUserSingleton().clearUser();
+
     await _userService.logout();
+
+    await LocalUserStorage.deleteUser();
+
     if (!mounted) return;
-    Navigator.of(context).pop();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const AuthPage()),
+          (route) => false,
+    );
   }
 
   Future<void> _pickBirthDate() async {
