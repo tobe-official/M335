@@ -1,10 +1,10 @@
 import 'package:WalkeRoo/enums/user_motivation_enum.dart';
 import 'package:WalkeRoo/models/user_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../models/offline_activity.dart';
-import 'offline_queue_service.dart';
+import '../storage/offline_queue_service.dart';
 
 class UserService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -146,27 +146,32 @@ class UserService {
 
   Future<void> addActivity(int steps) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('No user is logged in');
+    if (user == null) return;
 
-    try {
-      await _firestore.collection('activities').add({
-        'userId': user.uid,
-        'steps': steps,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
+    final conn = await Connectivity().checkConnectivity();
+    final isOnline = conn == ConnectivityResult.mobile || conn == ConnectivityResult.wifi;
 
-      await _firestore.collection('users').doc(user.uid).update({
-        'totalSteps': FieldValue.increment(steps),
-      });
-    } on Exception {
-      await OfflineQueueService().addActivity(
+    if (!isOnline) {
+      await OfflineQueue.add(
         OfflineActivity(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
           userId: user.uid,
           steps: steps,
           timestamp: DateTime.now(),
         ),
       );
+      return;
     }
+
+    await _firestore.collection('activities').add({
+      'userId': user.uid,
+      'steps': steps,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    await _firestore.collection('users').doc(user.uid).update({
+      'totalSteps': FieldValue.increment(steps),
+    });
   }
 
   Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
