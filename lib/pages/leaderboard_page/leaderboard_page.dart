@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 
+import '../../data_fetching/friends_service.dart';
+
 class LeaderboardPage extends StatelessWidget {
   const LeaderboardPage({super.key});
 
@@ -12,21 +14,16 @@ class LeaderboardPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFDADADA),
         elevation: 0,
-        leading: IconButton(
-          onPressed: _onNotification,
-          icon: const Icon(Icons.mail_outline, color: Colors.black, size: 30),
-          tooltip: 'Friend Requests',
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 6, right: 10),
-            child: IconButton(
-              icon: const Icon(Icons.person_add_alt_1, color: Colors.black, size: 30),
-              onPressed: _onAddFriends,
-              tooltip: 'Add Friend',
-            ),
+          leading: IconButton(
+            onPressed: () => _onNotification(context),
+            icon: const Icon(Icons.mail_outline),
           ),
-        ],
+          actions: [
+            IconButton(
+              onPressed: () => _onAddFriends(context),
+              icon: const Icon(Icons.person_add_alt_1),
+            )
+          ]
       ),
       bottomNavigationBar: CustomNavigationBar(initialIndexOfScreen: 3),
     );
@@ -81,7 +78,78 @@ class LeaderboardPage extends StatelessWidget {
     );
   }
 
-  void _onAddFriends() {}
+  void _onAddFriends(BuildContext context) {
+    String username = "";
 
-  void _onNotification() {}
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add Friend"),
+          content: TextField(
+            decoration: const InputDecoration(hintText: "Enter username"),
+            onChanged: (v) => username = v.trim(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  await FriendsService().sendFriendRequest(username);
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.toString())),
+                  );
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void _onNotification(BuildContext context) async {
+    final requests = await FriendsService().getFriendRequests();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Friend Requests"),
+          content: SizedBox(
+            width: 300,
+            height: 300,
+            child: requests.isEmpty
+                ? const Center(child: Text("No requests"))
+                : ListView.builder(
+              itemCount: requests.length,
+              itemBuilder: (c, i) {
+                final r = requests[i];
+                return ListTile(
+                  title: Text(r['fromUsername']),
+                  trailing: TextButton(
+                    child: const Text("Accept"),
+                    onPressed: () async {
+                      await FriendsService()
+                          .acceptFriendRequest(r['id'], r['fromUid']);
+                      Navigator.pop(context);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
 }
