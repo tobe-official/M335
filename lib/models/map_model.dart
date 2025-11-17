@@ -2,7 +2,7 @@ import 'package:latlong2/latlong.dart';
 
 class RouteModel {
   final String id;
-  final String userUid;
+  final String username;
   final DateTime startTime;
   final DateTime endTime;
   final int stepCount;
@@ -11,7 +11,7 @@ class RouteModel {
 
   RouteModel({
     required this.id,
-    required this.userUid,
+    required this.username,
     required this.startTime,
     required this.endTime,
     required this.stepCount,
@@ -21,7 +21,7 @@ class RouteModel {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'userUid': userUid,
+    'username': username,
     'startTime': startTime.toIso8601String(),
     'endTime': endTime.toIso8601String(),
     'stepCount': stepCount,
@@ -35,7 +35,7 @@ class RouteModel {
 
   factory RouteModel.fromJson(Map<String, dynamic> json) => RouteModel(
     id: json['id'],
-    userUid: json['userUid'] ?? '',
+    username: json['username'] ?? '',
     startTime: DateTime.parse(json['startTime']),
     endTime: DateTime.parse(json['endTime']),
     stepCount: json['stepCount'] ?? 0,

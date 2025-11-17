@@ -1,7 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:WalkeRoo/enums/user_motivation_enum.dart';
 import 'package:WalkeRoo/models/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../models/offline_activity.dart';
+import '../storage/offline_queue_service.dart';
 
 class UserService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -13,7 +16,10 @@ class UserService {
     required String username,
     required DateTime birthDate,
   }) async {
-    final credential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    final credential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     final uid = credential.user!.uid;
     final now = DateTime.now();
 
@@ -45,7 +51,10 @@ class UserService {
   }
 
   Future<UserModel> loginUser(String email, String password) async {
-    final credential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+    final credential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
     final uid = credential.user!.uid;
 
     final ref = _firestore.collection('users').doc(uid);
@@ -86,7 +95,8 @@ class UserService {
 
     final username = (data['username'] as String?) ?? email.split('@').first;
     final nameFromDb = data['name'] as String?;
-    final name = (nameFromDb?.trim().isNotEmpty == true) ? nameFromDb! : username;
+    final name =
+        (nameFromDb?.trim().isNotEmpty == true) ? nameFromDb! : username;
 
     final ageTs = data['age'] as Timestamp?;
     final age = ageTs?.toDate() ?? now.subtract(const Duration(days: 365 * 18));
@@ -102,10 +112,12 @@ class UserService {
 
     final motivationRaw = data['userMotivation'] as String?;
     final motivation =
-    motivationRaw != null
-        ? UserMotivation.values.firstWhere((m) => m.name == motivationRaw,
-        orElse: () => UserMotivation.other)
-        : UserMotivation.other;
+        motivationRaw != null
+            ? UserMotivation.values.firstWhere(
+              (m) => m.name == motivationRaw,
+              orElse: () => UserMotivation.other,
+            )
+            : UserMotivation.other;
 
     return UserModel(
       username: username,
@@ -134,7 +146,22 @@ class UserService {
 
   Future<void> addActivity(int steps) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception('No user is logged in');
+    if (user == null) return;
+
+    final conn = await Connectivity().checkConnectivity();
+    final isOnline = conn == ConnectivityResult.mobile || conn == ConnectivityResult.wifi;
+
+    if (!isOnline) {
+      await OfflineQueue.add(
+        OfflineActivity(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          userId: user.uid,
+          steps: steps,
+          timestamp: DateTime.now(),
+        ),
+      );
+      return;
+    }
 
     await _firestore.collection('activities').add({
       'userId': user.uid,
@@ -147,20 +174,21 @@ class UserService {
     });
   }
 
-  Future<List<QueryDocumentSnapshot<
-      Map<String, dynamic>>>> getActivitiesLast7Days() async {
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>>
+  getActivitiesLast7Days() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception("Not logged in.");
 
     final now = DateTime.now();
     final weekAgo = now.subtract(const Duration(days: 7));
 
-    final snap = await _firestore
-        .collection('activities')
-        .where('userId', isEqualTo: user.uid)
-        .where('timestamp', isGreaterThan: weekAgo)
-        .orderBy('timestamp', descending: true)
-        .get();
+    final snap =
+        await _firestore
+            .collection('activities')
+            .where('userId', isEqualTo: user.uid)
+            .where('timestamp', isGreaterThan: weekAgo)
+            .orderBy('timestamp', descending: true)
+            .get();
 
     return snap.docs;
   }
@@ -169,17 +197,31 @@ class UserService {
     final docs = await getActivitiesLast7Days();
     final total = docs.fold<int>(
       0,
-          (sum, doc) => sum + (doc['steps'] as int? ?? 0),
+      (sum, doc) => sum + (doc['steps'] as int? ?? 0),
     );
     return total;
+  }
+
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUserActivities() {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No user is logged in');
+
+    return _firestore
+        .collection('activities')
+        .where('userId', isEqualTo: user.uid)
+        .orderBy('timestamp', descending: true)
+        .snapshots();
   }
 
   Future<void> deleteUserAccount() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user is logged in');
 
-    final activities = await _firestore.collection('activities').where(
-        'userId', isEqualTo: user.uid).get();
+    final activities =
+        await _firestore
+            .collection('activities')
+            .where('userId', isEqualTo: user.uid)
+            .get();
 
     for (var doc in activities.docs) {
       await doc.reference.delete();

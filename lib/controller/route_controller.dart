@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:WalkeRoo/models/map_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../singletons/active_user_singleton.dart';
 
 class RouteController {
   static final RouteController _instance = RouteController._internal();
@@ -32,7 +33,7 @@ class RouteController {
       ..addAll(
           jsonData
               .map((e) => RouteModel.fromJson(e))
-              .where((route) => route.userUid == _auth.currentUser?.uid)
+              .where((route) => route.username == (ActiveUserSingleton().activeUser?.username ?? "offline"))
       );
   }
 
@@ -49,12 +50,14 @@ class RouteController {
     required DateTime start,
     required DateTime end,
   }) async {
+    final username = ActiveUserSingleton().activeUser?.username ?? "offline";
+
     final route = RouteModel(
       id: DateTime
           .now()
           .millisecondsSinceEpoch
           .toString(),
-      userUid: _auth.currentUser?.uid ?? '',
+      username: username,
       startTime: start,
       endTime: end,
       stepCount: stepDiff,
