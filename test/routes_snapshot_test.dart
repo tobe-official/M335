@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
 import 'package:latlong2/latlong.dart';
-import 'package:WalkeRoo/pages/routes_page/routes_page.dart';
 
 class FakeFlutterMap extends StatelessWidget {
   const FakeFlutterMap({super.key});
@@ -27,7 +26,7 @@ void main() {
   });
 
   testGoldens('RoutesPage snapshot with one selected route', (tester) async {
-    final testRoute = RouteModel(
+    RouteModel(
       id: 'r1',
       username: 'tester',
       startTime: DateTime(2024, 1, 1, 12, 00),
