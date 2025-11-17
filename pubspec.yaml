@@ -48,6 +48,7 @@ dependencies:
   geocoding: ^4.0.0
   flutter_launcher_icons: ^0.14.4
   path_provider: ^2.1.5
+  mocktail: ^1.0.4
 
 # This changes the default Flutter Icon to be our custom Icon.
 flutter_launcher_icons:

@@ -5,11 +5,16 @@ import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:WalkeRoo/models/user_model.dart';
 import 'package:WalkeRoo/singletons/active_user_singleton.dart';
 import 'package:WalkeRoo/enums/user_motivation_enum.dart';
-import '../../storage/local_user_storage.dart';
-import '../auth/auth_page.dart';
+import 'package:WalkeRoo/storage/local_user_storage.dart';
+import 'package:WalkeRoo/pages/auth/auth_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, UserService? userService, UserModel? initialUser})
+    : _userService = userService,
+      _initialUser = initialUser;
+
+  final UserService? _userService;
+  final UserModel? _initialUser;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -23,12 +28,15 @@ class _ProfilePageState extends State<ProfilePage> {
   late TextEditingController _aboutC;
   late DateTime _birthDate;
   UserMotivation? _motivation;
-  final UserService _userService = UserService();
+  late final UserService _userService;
 
   @override
   void initState() {
     super.initState();
-    _user = ActiveUserSingleton().activeUser!;
+
+    _userService = widget._userService ?? UserService();
+    _user = widget._initialUser ?? ActiveUserSingleton().activeUser!;
+
     _nameC = TextEditingController(text: _user.name);
     _aboutC = TextEditingController(text: _user.aboutMe);
     _birthDate = _user.age;
@@ -95,18 +103,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _logout() async {
     ActiveUserSingleton().clearUser();
-
     await _userService.logout();
-
     await LocalUserStorage.deleteUser();
 
     if (!mounted) return;
 
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const AuthPage()),
-          (route) => false,
-    );
+    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const AuthPage()), (route) => false);
   }
 
   Future<void> _pickBirthDate() async {
@@ -187,7 +189,10 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
           ),
     );
-    if (picked != null) setState(() => _motivation = picked);
+
+    if (picked != null) {
+      setState(() => _motivation = picked);
+    }
   }
 
   Widget _header() => Padding(
