@@ -1,4 +1,4 @@
-import 'package:WalkeRoo/models/route_model.dart';
+import 'package:WalkeRoo/models/map_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockRouteStorage {
