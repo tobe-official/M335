@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../data_fetching/user_service.dart';
-import '../../controller/route_controller.dart';
-
+import 'package:WalkeRoo/data_fetching/user_service.dart';
 
 class FriendsStatsPage extends StatefulWidget {
   final String userId;
@@ -14,17 +12,11 @@ class FriendsStatsPage extends StatefulWidget {
 }
 
 class _UserStatsPageState extends State<FriendsStatsPage> {
-  final _routeController = RouteController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0XFFD2D2D2),
-      appBar: AppBar(
-        title: const Text("User Stats"),
-        backgroundColor: Color(0XFFD2D2D2),
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text("User Stats"), backgroundColor: Color(0XFFD2D2D2), elevation: 0),
       body: _body(),
     );
   }
@@ -43,8 +35,7 @@ class _UserStatsPageState extends State<FriendsStatsPage> {
           return const Center(child: CircularProgressIndicator());
         }
 
-        final userDoc = snapshot.data![0] as DocumentSnapshot<
-            Map<String, dynamic>>;
+        final userDoc = snapshot.data![0] as DocumentSnapshot<Map<String, dynamic>>;
         final steps7Days = snapshot.data![1] as int;
 
         final user = userDoc.data()!;
@@ -59,8 +50,7 @@ class _UserStatsPageState extends State<FriendsStatsPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(username, style: const TextStyle(
-                  fontSize: 28, fontWeight: FontWeight.bold)),
+              Text(username, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Divider(),
 
@@ -77,16 +67,14 @@ class _UserStatsPageState extends State<FriendsStatsPage> {
     );
   }
 
-  Widget _stat(String label, String value) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 16)),
-            Text(value, style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold)),
-          ],
-        ),
-      );
+  Widget _stat(String label, String value) => Padding(
+    padding: const EdgeInsets.only(bottom: 12.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 16)),
+        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+      ],
+    ),
+  );
 }

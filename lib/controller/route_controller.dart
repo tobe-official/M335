@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:WalkeRoo/models/map_model.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../singletons/active_user_singleton.dart';
 
 class RouteController {
@@ -11,9 +10,7 @@ class RouteController {
   factory RouteController() => _instance;
   RouteController._internal();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  final List<RouteModel> _routes = []; // TODO persist routes in local storage not online runtime
+  final List<RouteModel> _routes = [];
 
   List<RouteModel> get allRoutes => List.unmodifiable(_routes);
 
@@ -31,9 +28,9 @@ class RouteController {
     _routes
       ..clear()
       ..addAll(
-          jsonData
-              .map((e) => RouteModel.fromJson(e))
-              .where((route) => route.username == (ActiveUserSingleton().activeUser?.username ?? "offline"))
+        jsonData
+            .map((e) => RouteModel.fromJson(e))
+            .where((route) => route.username == (ActiveUserSingleton().activeUser?.username ?? "offline")),
       );
   }
 
@@ -53,10 +50,7 @@ class RouteController {
     final username = ActiveUserSingleton().activeUser?.username ?? "offline";
 
     final route = RouteModel(
-      id: DateTime
-          .now()
-          .millisecondsSinceEpoch
-          .toString(),
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       username: username,
       startTime: start,
       endTime: end,
@@ -88,11 +82,9 @@ class RouteController {
 
   List<RouteModel> getRoutesFromToday() {
     final now = DateTime.now();
-    return _routes.where((r) =>
-    r.startTime.year == now.year &&
-        r.startTime.month == now.month &&
-        r.startTime.day == now.day
-    ).toList();
+    return _routes
+        .where((r) => r.startTime.year == now.year && r.startTime.month == now.month && r.startTime.day == now.day)
+        .toList();
   }
 
   int getTotalMinutesFromToday() {
