@@ -1,4 +1,5 @@
 import 'package:WalkeRoo/pages/personal_stats_page/statRow.dart';
+import 'package:WalkeRoo/pages/personal_stats_page/stats_calculations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -53,11 +54,14 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final userSnap = snapshot.data![0] as DocumentSnapshot<Map<String, dynamic>>;
+          final userSnap =
+              snapshot.data![0] as DocumentSnapshot<Map<String, dynamic>>;
           final totalStepsWeek = snapshot.data![1] as int;
 
           if (!userSnap.exists) {
-            return const Center(child: Text('No user data found', style: TextStyle(fontSize: 18)));
+            return const Center(
+              child: Text('No user data found', style: TextStyle(fontSize: 18)),
+            );
           }
 
           final userData = userSnap.data()!;
@@ -65,7 +69,8 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
 
 
           const double averageStepLengthMeters = 0.78;
-          double totalDistanceKmToday = (totalStepsToday * averageStepLengthMeters) / 1000;
+          double totalDistanceKmToday =
+              (totalStepsToday * averageStepLengthMeters) / 1000;
 
           final routesToday = _routeController.getRoutesFromToday();
           final totalMinutesToday = _routeController.getTotalMinutesFromToday();
@@ -73,25 +78,44 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
           double kmTodayFromRoutes = 0;
 
           for (var r in routesToday) {
-            kmTodayFromRoutes += (r.stepCount * averageStepLengthMeters) / 1000;
+            kmTodayFromRoutes += calculateDistanceKm(r.stepCount, averageStepLengthMeters);
           }
 
-          double paceKmPerHour = totalMinutesToday > 0 ? kmTodayFromRoutes / (totalMinutesToday / 60) : 0;
+
+          double paceKmPerHour =
+              totalMinutesToday > 0
+                  ? kmTodayFromRoutes / (totalMinutesToday / 60)
+                  : 0;
 
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 16.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 32),
-                const Text("Here are your stats:", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600)),
+                const Text(
+                  "Here are your stats:",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                ),
                 const Divider(thickness: 1, height: 20),
                 const SizedBox(height: 20),
 
                 StatRow(label: "Total steps today:", value: "$totalStepsToday"),
-                StatRow(label: "Total steps last week:", value: "$totalStepsWeek"),
-                StatRow(label: "Walking pace (km/h):", value: paceKmPerHour.toStringAsFixed(2)),
-                StatRow(label: "Total KM today:", value: "${totalDistanceKmToday.toStringAsFixed(2)} KM"),
+                StatRow(
+                  label: "Total steps last week:",
+                  value: "$totalStepsWeek",
+                ),
+                StatRow(
+                  label: "Walking pace (km/h):",
+                  value: paceKmPerHour.toStringAsFixed(2),
+                ),
+                StatRow(
+                  label: "Total KM today:",
+                  value: "${totalDistanceKmToday.toStringAsFixed(2)} KM",
+                ),
 
                 const Spacer(),
 
@@ -103,7 +127,9 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 18),
                         ),
                         onPressed: () {
@@ -111,7 +137,11 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
                         },
                         child: const Text(
                           "See Saved Routes",
-                          style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.w600),
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
@@ -124,4 +154,5 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
       ),
     );
   }
+
 }
