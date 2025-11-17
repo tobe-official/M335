@@ -22,7 +22,7 @@ void main() {
       age: DateTime(2000, 1, 1),
       friends: const [],
       userMotivation: UserMotivation.other,
-      aboutMe: '',
+      aboutMe: 'Original about',
       creationTime: DateTime(2024, 1, 1),
       totalSteps: 0,
     );
@@ -31,15 +31,90 @@ void main() {
     when(() => mockService.logout()).thenAnswer((_) async {});
   });
 
-  testWidgets('test changes name and save changes', (tester) async {
+  testWidgets('only name is changed, all other fields stay the same in update payload', (tester) async {
     await tester.pumpWidget(MaterialApp(home: ProfilePage(userService: mockService, initialUser: baseUser)));
+    await tester.pumpAndSettle();
 
     final nameField = find.byType(TextField).first;
     await tester.enterText(nameField, 'New Name');
-    await tester.tap(find.text('Save'));
+    await tester.pump();
+
+    final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+    await tester.ensureVisible(saveButton);
+    await tester.tap(saveButton);
     await tester.pump();
 
     final captured = verify(() => mockService.updateUserData(captureAny())).captured.single as Map<String, dynamic>;
+
     expect(captured['name'], 'New Name');
+    expect(captured['aboutMe'], baseUser.aboutMe);
+    expect(captured['age'], baseUser.age);
+    expect(captured['userMotivation'], (baseUser.userMotivation ?? UserMotivation.other).name);
+    expect(captured.keys.toSet(), {'name', 'aboutMe', 'age', 'userMotivation'});
+  });
+
+  testWidgets('initial profile data is rendered correctly', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ProfilePage(userService: mockService, initialUser: baseUser)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('@raphael'), findsOneWidget);
+    expect(find.text('Raphael'), findsOneWidget);
+    expect(find.text('Original about'), findsOneWidget);
+    expect(find.textContaining('WalkeRooner since'), findsOneWidget);
+  });
+
+  testWidgets('changing aboutMe only updates aboutMe field', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ProfilePage(userService: mockService, initialUser: baseUser)));
+    await tester.pumpAndSettle();
+
+    final aboutField = find.byWidgetPredicate((w) => w is TextField && w.maxLines == 5);
+
+    await tester.enterText(aboutField, 'New about text');
+    await tester.pump();
+
+    final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+    await tester.ensureVisible(saveButton);
+    await tester.tap(saveButton);
+    await tester.pump();
+
+    final captured = verify(() => mockService.updateUserData(captureAny())).captured.single as Map<String, dynamic>;
+
+    expect(captured['aboutMe'], 'New about text');
+    expect(captured['name'], baseUser.name);
+    expect(captured['age'], baseUser.age);
+    expect(captured['userMotivation'], (baseUser.userMotivation ?? UserMotivation.other).name);
+  });
+
+  testWidgets('empty name is saved as empty and other fields unchanged', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ProfilePage(userService: mockService, initialUser: baseUser)));
+    await tester.pumpAndSettle();
+
+    final nameField = find.byType(TextField).first;
+    await tester.enterText(nameField, '');
+    await tester.pump();
+
+    final saveButton = find.widgetWithText(ElevatedButton, 'Save');
+    await tester.ensureVisible(saveButton);
+    await tester.tap(saveButton);
+    await tester.pump();
+
+    final captured = verify(() => mockService.updateUserData(captureAny())).captured.single as Map<String, dynamic>;
+
+    expect(captured['name'], '');
+    expect(captured['aboutMe'], baseUser.aboutMe);
+    expect(captured['age'], baseUser.age);
+    expect(captured['userMotivation'], (baseUser.userMotivation ?? UserMotivation.other).name);
+  });
+
+  testWidgets('logout calls userService.logout once', (tester) async {
+    await tester.pumpWidget(MaterialApp(home: ProfilePage(userService: mockService, initialUser: baseUser)));
+    await tester.pumpAndSettle();
+
+    final logoutButton = find.byIcon(Icons.logout);
+    await tester.ensureVisible(logoutButton);
+    await tester.tap(logoutButton);
+    await tester.pumpAndSettle();
+
+    verify(() => mockService.logout()).called(1);
   });
 }

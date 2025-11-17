@@ -1,4 +1,4 @@
-import 'package:WalkeRoo/models/route_model.dart';
+import 'package:WalkeRoo/models/map_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class MockRouteStorage {
@@ -56,15 +56,17 @@ void main() {
     });
 
     test('clear removes all routes', () async {
-      await storage.save(RouteModel(
-        id: 'test',
-        username: 'x',
-        startTime: DateTime.now(),
-        endTime: DateTime.now(),
-        stepCount: 5,
-        points: [],
-        stopPoints: [],
-      ));
+      await storage.save(
+        RouteModel(
+          id: 'test',
+          username: 'x',
+          startTime: DateTime.now(),
+          endTime: DateTime.now(),
+          stepCount: 5,
+          points: [],
+          stopPoints: [],
+        ),
+      );
 
       await storage.clear();
       final all = await storage.getAll();
