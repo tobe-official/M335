@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:WalkeRoo/data_fetching/user_service.dart';
+import 'package:WalkeRoo/models/user_model.dart';
 import 'package:WalkeRoo/pages/home_page/home_page.dart';
 import 'package:WalkeRoo/singletons/active_user_singleton.dart';
-import 'package:WalkeRoo/models/user_model.dart';
-import 'package:WalkeRoo/data_fetching/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../../storage/local_user_storage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -60,9 +61,24 @@ class _LoginPageState extends State<LoginPage> {
       final UserModel user = await _userService.loginUser(email, password);
       ActiveUserSingleton().activeUser = user;
 
+      await LocalUserStorage.saveUser(user);
+
       if (!mounted) return;
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomePage()));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomePage()),
+      );
     } on FirebaseAuthException catch (e) {
+      final saved = await LocalUserStorage.loadUser();
+      if (saved != null) {
+        ActiveUserSingleton().activeUser = saved;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+        return;
+      }
+
       _showToast(_authError(e));
     } catch (_) {
       _showToast('Login failed. Please try again.');
@@ -88,23 +104,33 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void _showToast(String msg) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  void _showToast(String msg) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
-  InputDecoration _inputStyle(String label, {Widget? suffix}) => InputDecoration(
-    labelText: label,
-    filled: true,
-    fillColor: Colors.white,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-    border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
-    suffixIcon: suffix,
-  );
+  InputDecoration _inputStyle(String label, {Widget? suffix}) =>
+      InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        suffixIcon: suffix,
+      );
 
   Widget _card({required Widget child}) => Container(
     padding: const EdgeInsets.all(18),
     decoration: BoxDecoration(
       color: accent,
       borderRadius: BorderRadius.circular(18),
-      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 6))],
+      boxShadow: const [
+        BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 6)),
+      ],
     ),
     child: child,
   );
@@ -119,7 +145,10 @@ class _LoginPageState extends State<LoginPage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 2,
       ),
-      child: Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+      ),
     ),
   );
 
@@ -133,17 +162,27 @@ class _LoginPageState extends State<LoginPage> {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
-      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 14, offset: Offset(0, 6))],
+      boxShadow: const [
+        BoxShadow(color: Colors.black26, blurRadius: 14, offset: Offset(0, 6)),
+      ],
     ),
-    child: const Center(child: Icon(Icons.directions_walk_rounded, color: Colors.white, size: 40)),
+    child: const Center(
+      child: Icon(Icons.directions_walk_rounded, color: Colors.white, size: 40),
+    ),
   );
 
   Widget _title() => const Column(
     children: [
       SizedBox(height: 16),
-      Text('Welcome back', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+      Text(
+        'Welcome back',
+        style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+      ),
       SizedBox(height: 6),
-      Text('Sign in to WalkeRoo', style: TextStyle(fontSize: 15, color: Colors.black54)),
+      Text(
+        'Sign in to WalkeRoo',
+        style: TextStyle(fontSize: 15, color: Colors.black54),
+      ),
     ],
   );
 
@@ -180,7 +219,9 @@ class _LoginPageState extends State<LoginPage> {
         const SizedBox(height: 12),
         _passwordField(),
         const SizedBox(height: 18),
-        _isLoading ? const CircularProgressIndicator() : _primaryButton('Login', _login),
+        _isLoading
+            ? const CircularProgressIndicator()
+            : _primaryButton('Login', _login),
       ],
     ),
   );
@@ -190,7 +231,10 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Login',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: const Color(0xFFDADADA),
       ),
@@ -205,7 +249,13 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [_logo(), _title(), const SizedBox(height: 28), _formFields(), const SizedBox(height: 200)],
+                  children: [
+                    _logo(),
+                    _title(),
+                    const SizedBox(height: 28),
+                    _formFields(),
+                    const SizedBox(height: 200),
+                  ],
                 ),
               ),
             ),
