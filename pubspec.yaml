@@ -65,6 +65,8 @@ flutter_native_splash:
   ios: true
 
 dev_dependencies:
+  test_snapshots: ^1.0.0
+  golden_toolkit: ^0.15.0
   flutter_native_splash: ^2.4.2   # oder passend zu deinem Projekt
   flutter_test:
     sdk: flutter
