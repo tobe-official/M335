@@ -174,18 +174,6 @@ class UserService {
     return total;
   }
 
-
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUserActivities() {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception('No user is logged in');
-
-    return _firestore
-        .collection('activities')
-        .where('userId', isEqualTo: user.uid)
-        .orderBy('timestamp', descending: true)
-        .snapshots();
-  }
-
   Future<void> deleteUserAccount() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No user is logged in');
@@ -199,5 +187,43 @@ class UserService {
 
     await _firestore.collection('users').doc(user.uid).delete();
     await user.delete();
+  }
+
+  Future<int> getStepsLast7DaysFor(String uid) async {
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+
+    final snap = await _firestore
+        .collection('activities')
+        .where('userId', isEqualTo: uid)
+        .where('timestamp', isGreaterThan: Timestamp.fromDate(weekAgo))
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    var total = 0;
+    for (final doc in snap.docs) {
+      total += (doc['steps'] as num).toInt();
+    }
+
+    return total;
+  }
+
+  Future<int> getStepsTodayFor(String uid) async {
+    final now = DateTime.now();
+    final startOfDay = DateTime(now.year, now.month, now.day);
+
+    final snap = await _firestore
+        .collection('activities')
+        .where('userId', isEqualTo: uid)
+        .where('timestamp', isGreaterThan: Timestamp.fromDate(startOfDay))
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    var total = 0;
+    for (final doc in snap.docs) {
+      total += (doc['steps'] as num).toInt();
+    }
+
+    return total;
   }
 }

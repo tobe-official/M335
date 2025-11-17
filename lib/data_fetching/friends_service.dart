@@ -78,35 +78,49 @@ class FriendsService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('Not logged in');
 
+    // Hole User + Friends
     final userDoc = await _firestore.collection('users').doc(user.uid).get();
     final userData = userDoc.data() ?? {};
 
     final friends = userData['friendsUids']?.cast<String>() ?? [];
-
     final allIds = [...friends, user.uid];
 
-    final List<Map<String, dynamic>> results = [];
+    List<Map<String, dynamic>> result = [];
 
-    const int batchSize = 10;
-    for (var i = 0; i < allIds.length; i += batchSize) {
-      final chunk = allIds.skip(i).take(batchSize).toList();
+    for (final id in allIds) {
+      final weeklySteps = await _getStepsForLast7DaysForUser(id);
 
-      final query = await _firestore
-          .collection('users')
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get();
+      final userSnap = await _firestore.collection('users').doc(id).get();
+      final data = userSnap.data() ?? {};
 
-      for (var doc in query.docs) {
-        results.add({'id': doc.id, ...doc.data()});
-      }
+      result.add({
+        'id': id,
+        'username': data['username'] ?? 'unknown',
+        'steps7days': weeklySteps,
+      });
     }
 
-    results.sort((a, b) {
-      final aSteps = (a['totalSteps'] ?? 0) as int;
-      final bSteps = (b['totalSteps'] ?? 0) as int;
-      return bSteps.compareTo(aSteps);
-    });
+    result.sort((a, b) => b['steps7days'].compareTo(a['steps7days']));
 
-    return results;
+    return result;
   }
+
+  Future<int> _getStepsForLast7DaysForUser(String uid) async {
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+
+    final snap = await _firestore
+        .collection('activities')
+        .where('userId', isEqualTo: uid)
+        .where('timestamp', isGreaterThan: Timestamp.fromDate(weekAgo))
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    var total = 0;
+    for (final doc in snap.docs) {
+      total += (doc['steps'] as num?)?.toInt() ?? 0;
+    }
+    return total;
+  }
+
 }

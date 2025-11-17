@@ -1,3 +1,4 @@
+import 'package:WalkeRoo/pages/friends_stats_page/friends_stats_page.dart';
 import 'package:flutter/material.dart';
 import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 
@@ -48,7 +49,6 @@ class LeaderboardPage extends StatelessWidget {
               const Icon(Icons.emoji_events, size: 80, color: Colors.black),
               const SizedBox(height: 20),
 
-              // LIST
               Expanded(
                 child: ListView.builder(
                   itemCount: leaderboard.length,
@@ -67,6 +67,14 @@ class LeaderboardPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: ListTile(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FriendsStatsPage(userId: user['id']),
+                            ),
+                          );
+                        },
                         leading: Text(
                           '${index + 1}.',
                           style: const TextStyle(
@@ -77,7 +85,7 @@ class LeaderboardPage extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w500),
                         ),
                         trailing: Text(
-                          "${user['totalSteps'] ?? 0}",
+                          "${user['steps7days'] ?? 0}",
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
