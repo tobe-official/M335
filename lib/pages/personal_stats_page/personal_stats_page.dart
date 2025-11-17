@@ -1,5 +1,6 @@
 import 'package:WalkeRoo/pages/personal_stats_page/statRow.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:WalkeRoo/controller/route_controller.dart';
@@ -44,6 +45,7 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
         future: Future.wait([
           userService.getCurrentUserProfile().first,
           userService.getTotalStepsLast7Days(),
+          userService.getStepsTodayFor(FirebaseAuth.instance.currentUser!.uid),
           _routeController.loadRoutes(),
         ]),
         builder: (context, snapshot) {
@@ -59,7 +61,8 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
           }
 
           final userData = userSnap.data()!;
-          final totalStepsToday = userData['totalSteps'] ?? 0;
+          final totalStepsToday = snapshot.data![2] as int;
+
 
           const double averageStepLengthMeters = 0.78;
           double totalDistanceKmToday = (totalStepsToday * averageStepLengthMeters) / 1000;
