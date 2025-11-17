@@ -1,7 +1,7 @@
 import 'package:WalkeRoo/pages/personal_stats_page/statRow.dart';
+import 'package:WalkeRoo/pages/personal_stats_page/stats_calculations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:WalkeRoo/global_widgets/custom_navigation_bar.dart';
 import 'package:WalkeRoo/controller/route_controller.dart';
@@ -71,7 +71,9 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
 
           const double averageStepLengthMeters = 0.78;
           double totalDistanceKmToday =
-              (totalStepsToday * averageStepLengthMeters) / 1000;
+          calculateDistanceKm(totalStepsToday, averageStepLengthMeters);
+
+
 
           final routesToday = _routeController.getRoutesFromToday();
           final totalMinutesToday = _routeController.getTotalMinutesFromToday();
@@ -79,13 +81,13 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
           double kmTodayFromRoutes = 0;
 
           for (var r in routesToday) {
-            kmTodayFromRoutes += (r.stepCount * averageStepLengthMeters) / 1000;
+            kmTodayFromRoutes += calculateDistanceKm(r.stepCount, averageStepLengthMeters);
           }
 
+
           double paceKmPerHour =
-              totalMinutesToday > 0
-                  ? kmTodayFromRoutes / (totalMinutesToday / 60)
-                  : 0;
+          calculatePaceKmH(kmTodayFromRoutes, totalMinutesToday);
+
 
           return Padding(
             padding: const EdgeInsets.symmetric(
@@ -154,4 +156,5 @@ class _PersonalStatsPageState extends State<PersonalStatsPage> {
       ),
     );
   }
+
 }
