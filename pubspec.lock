@@ -456,6 +456,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  golden_toolkit:
+    dependency: "direct dev"
+    description:
+      name: golden_toolkit
+      sha256: "8f74adab33154fe7b731395782797021f97d2edc52f7bfb85ff4f1b5c4a215f0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.15.0"
   html:
     dependency: transitive
     description:
@@ -973,6 +981,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.11"
+  test_snapshots:
+    dependency: "direct dev"
+    description:
+      name: test_snapshots
+      sha256: "89e43cc0e198d947d71b66fa688bc5960465e074744b6a12b0f244cae374ccf6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   typed_data:
     dependency: transitive
     description:
