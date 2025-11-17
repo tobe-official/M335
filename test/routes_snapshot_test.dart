@@ -1,8 +1,8 @@
+import 'package:WalkeRoo/models/map_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
 
-import 'package:WalkeRoo/models/route_model.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:WalkeRoo/pages/routes_page/routes_page.dart';
 
